@@ -1,0 +1,21 @@
+# Build results
+bin/
+obj/
+*.exe
+*.dll
+
+# User-specific files
+*.user
+*.suo
+
+# VS Code and Rider config
+.vscode/
+.idea/
+
+# Debug logs
+*.log
+
+# NuGet
+packages/
+*.nupkg
+*.snupkg
