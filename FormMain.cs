@@ -1,38 +1,32 @@
 using System;
 using System.Windows.Forms;
+using System.Diagnostics;
 
 namespace CreativeFileBrowser
 {
     public partial class FormMain : Form
     {
-        //declare vars/instantiate quadrant nested layout -- NESTED PANELS
+        //declare vars/instantiate quadrant nested layout -- NESTED PANELS       
         private Label labelSystemTitle, labelPreviewTitle, labelMonitoredTitle, labelGalleryTitle;
         private Panel panelSystemContent, panelPreviewContent, panelMonitoredContent, panelGalleryContent;
-
+        private Panel quadrantHostPanel;
 
         public FormMain()
         {
             InitializeComponent();
 
-            //**********************************************************************//
-            //LOAD THE UI STUFF BEFORE THE LOGIC
-            //**********************************************************************//            
-            this.Load += FormMain_Load;
-
-            // Lock both inner horizontal splits
-            //horizontalTop.SplitterDistance = halfWidth;
-            //horizontalBottom.SplitterDistance = halfWidth;
-
-            // make the splits move together
             horizontalTop.SplitterMoved += (_, _) =>
             {
-                horizontalBottom.SplitterDistance = horizontalTop.SplitterDistance;
+                if (horizontalBottom.SplitterDistance != horizontalTop.SplitterDistance)
+                    horizontalBottom.SplitterDistance = horizontalTop.SplitterDistance;
             };
 
             horizontalBottom.SplitterMoved += (_, _) =>
             {
-                horizontalTop.SplitterDistance = horizontalBottom.SplitterDistance;
+                if (horizontalTop.SplitterDistance != horizontalBottom.SplitterDistance)
+                    horizontalTop.SplitterDistance = horizontalBottom.SplitterDistance;
             };
+
 
         }
 
@@ -41,10 +35,8 @@ namespace CreativeFileBrowser
         //**********************************************************************//
         private void FormMain_Load(object sender, EventArgs e)
         {
-            AdjustVerticalSplitPosition(); // ✅ single clean call
-            ResetQuadrantsToMiddle();
-            AdjustLayout();
-
+            // Apply actual top padding now that ToolStrip has rendered
+            quadrantHostPanel.Padding = new Padding(0, 0, 0, 0);
             // Optional test
             panelSystemContent.Controls.Add(new Label
             {
@@ -58,17 +50,6 @@ namespace CreativeFileBrowser
         //**********************************************************************//
         private void AdjustLayout()
         {
-            int toolHeight = toolStripMain.Height;
-
-            int availableHeight = this.ClientSize.Height - toolStripMain.Height;
-            int half = availableHeight / 2;
-
-            availableHeight = this.ClientSize.Height - toolHeight;
-            int halfHeight = availableHeight / 2;
-            int halfWidth = this.ClientSize.Width / 2;
-
-            //quadrant sizing stuff
-            //create quadrant panels for NESTED content
             horizontalTop.Panel1.Controls.Clear();
             horizontalTop.Panel2.Controls.Clear();
             horizontalBottom.Panel1.Controls.Clear();
@@ -79,15 +60,6 @@ namespace CreativeFileBrowser
             horizontalBottom.Panel1.Controls.Add(CreateQuadrant("Monitored Folders", out labelMonitoredTitle, out panelMonitoredContent));
             horizontalBottom.Panel2.Controls.Add(CreateQuadrant("Monitored Gallery", out labelGalleryTitle, out panelGalleryContent));
         }
-        //size of quadrants dedicated method
-        private void AdjustVerticalSplitPosition()
-        {
-            if (toolStripMain == null || verticalSplit == null)
-                return;
-
-            verticalSplit.Location = new Point(0, toolStripMain.Height);
-            verticalSplit.Size = new Size(ClientSize.Width, ClientSize.Height - toolStripMain.Height * 2);
-        }
 
         //**********************************************************************//
         //QUADRANT MOVER HELPER METHOD
@@ -95,14 +67,6 @@ namespace CreativeFileBrowser
         protected override void OnResize(EventArgs e)
         {
             base.OnResize(e);
-            AdjustVerticalSplitPosition();
-
-            //if (horizontalTop != null && horizontalBottom != null)
-            //{
-            //    int halfWidth = this.ClientSize.Width / 2;
-            //    horizontalTop.SplitterDistance = halfWidth;
-            //    horizontalBottom.SplitterDistance = halfWidth;
-            //}
             if (this.IsHandleCreated && horizontalTop != null && horizontalBottom != null)
             {
                 // Optionally: only recenter on first load or if flag is set
@@ -136,8 +100,8 @@ namespace CreativeFileBrowser
             {
                 Dock = DockStyle.Fill,
                 BackColor = Color.Transparent,
-                Padding = new Padding(10, 10, 10, 15), // ⬅️ spacing inside each quadrant
-                BorderStyle = BorderStyle.FixedSingle,
+                Padding = new Padding(2), // ⬅️ spacing inside each quadrant
+                //BorderStyle = BorderStyle.FixedSingle,
             };
 
             titleLabel = new Label
@@ -146,24 +110,22 @@ namespace CreativeFileBrowser
                 Dock = DockStyle.Top,
                 Height = 34,
                 Font = new Font("Segoe UI", 9F, FontStyle.Bold),
-                BackColor = Color.White,
+                BackColor = Color.WhiteSmoke,
                 ForeColor = Color.Black,
                 TextAlign = ContentAlignment.MiddleLeft,
-                Padding = new Padding(12, 8, 0, 0),
+                Padding = new Padding(0, 0, 0, 0),
                 BorderStyle = BorderStyle.FixedSingle,
-                Margin = new Padding(0, 0, 0, 6) // ⬅️ space below label before content
+                Margin = new Padding(10, 0, 10, 2) // ⬅️ space below label before content
             };
 
             contentPanel = new Panel
             {
                 Dock = DockStyle.Fill,
                 BackColor = Color.White,
-                Padding = new Padding(4)
             };
 
             outerPanel.Controls.Add(contentPanel);
             outerPanel.Controls.Add(titleLabel);
-
             return outerPanel;
         }
 

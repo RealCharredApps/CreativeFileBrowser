@@ -17,11 +17,6 @@
         private ToolStripLabel lblWorkspace;
         private ToolStripComboBox workspaceDropDown;
 
-        private Panel quadrantTopLeft;
-        private Panel quadrantTopRight;
-        private Panel quadrantBottomLeft;
-        private Panel quadrantBottomRight;
-        private Panel pnlLayoutHost;
         private SplitContainer verticalSplit;
         private SplitContainer horizontalTop;
         private SplitContainer horizontalBottom;
@@ -49,10 +44,19 @@
             this.Size = new Size(940, 720);
 
             //**********************************************************************//
+            //NAME THE TOOLS  
+            //**********************************************************************//
+            this.toolStripMain = new ToolStrip();
+            this.quadrantHostPanel = new Panel();
+            this.verticalSplit = new SplitContainer();
+            this.horizontalTop = new SplitContainer();
+            this.horizontalBottom = new SplitContainer();
+
+            //**********************************************************************//
             //THE TOOLSTRIP AT THE TOP
             //**********************************************************************//
             // ToolStrip - the top menu stuff
-            this.toolStripMain = new ToolStrip();
+            this.toolStripMain.AutoSize = true;
             this.toolStripMain.Dock = DockStyle.Top;
 
             this.btnFileMenu = new ToolStripDropDownButton("File");
@@ -207,60 +211,43 @@
             //**********************************************************************//
             //THE QUADRANTS
             //**********************************************************************//
-            pnlLayoutHost = new Panel
-            {
-                Dock = DockStyle.Fill,
-                Location = new Point(0, toolStripMain.Height),
-                Padding = new Padding(0),
-                Margin = new Padding(0),
-                BackColor = Color.Transparent
-            };
+            // 
+            // verticalSplit
+            // 
+            this.verticalSplit.Dock = DockStyle.Fill;
+            this.verticalSplit.Orientation = Orientation.Horizontal;
+            this.verticalSplit.SplitterDistance = 360;
+            this.verticalSplit.Name = "verticalSplit";
 
-            // Create vertical split (top/bottom)
-            verticalSplit = new SplitContainer
-            {
-                Dock = DockStyle.Fill,
-                Orientation = Orientation.Horizontal,
-                SplitterWidth = 3,
-                BackColor = Color.LightGray
-            };
+            // 
+            // horizontalTop
+            // 
+            this.horizontalTop.Dock = DockStyle.Fill;
+            this.horizontalTop.Orientation = Orientation.Vertical;
+            this.horizontalTop.SplitterDistance = 360;
+            this.horizontalTop.Name = "horizontalTop";
 
-            // Create horizontal splits (left/right)
-            horizontalTop = new SplitContainer
-            {
-                Dock = DockStyle.Fill,
-                Orientation = Orientation.Vertical,
-                SplitterWidth = 3,
-                BackColor = Color.LightGray
-            };
+            // 
+            // horizontalBottom
+            // 
+            this.horizontalBottom.Dock = DockStyle.Fill;
+            this.horizontalBottom.Orientation = Orientation.Vertical;
+            this.horizontalBottom.SplitterDistance = 360;
+            this.horizontalBottom.Name = "horizontalBottom";
 
-            horizontalBottom = new SplitContainer
-            {
-                Dock = DockStyle.Fill,
-                Orientation = Orientation.Vertical,
-                SplitterWidth = 3,
-                BackColor = Color.LightGray
-            };
+            // 
+            // quadrantHostPanel
+            // 
+            this.quadrantHostPanel.Dock = DockStyle.Fill;
+            this.quadrantHostPanel.BackColor = Color.Transparent;
+            this.quadrantHostPanel.Padding = new Padding(0); // Top padding will be added dynamically
+            this.quadrantHostPanel.Controls.Add(this.verticalSplit);
 
-            // Add quadrant colors
-            horizontalTop.Panel1.BackColor = Color.WhiteSmoke;     // Top Left
-            horizontalTop.Panel2.BackColor = Color.White;          // Top Right
-            horizontalBottom.Panel1.BackColor = Color.Gainsboro;   // Bottom Left
-            horizontalBottom.Panel2.BackColor = Color.LightGray;   // Bottom Right
-
-            // Add to Form
-            //this.Controls.Add(verticalSplit);        // Main container
-            pnlLayoutHost.Controls.Add(verticalSplit);
-            verticalSplit.Dock = DockStyle.Fill; // Let the host manage its size
-
-            // Nest layout
-            verticalSplit.Panel1.Controls.Add(horizontalTop);
-            verticalSplit.Panel2.Controls.Add(horizontalBottom);
-
-            this.Controls.Add(pnlLayoutHost);
-            this.Controls.Add(toolStripMain);
-            this.Controls.SetChildIndex(toolStripMain, 0); // Bring toolbar to front
-
+            // 
+            // Nest split containers
+            // 
+            this.verticalSplit.Panel1.Controls.Add(this.horizontalTop);
+            this.verticalSplit.Panel2.Controls.Add(this.horizontalBottom);
 
             //******************************************************************************//
             // UI - organize the buttons with a separator line
@@ -289,52 +276,44 @@
             });
 
             //**********************************************************************//
-            //PREVIEW PANELS BELOW - RESP FLEX QUADRANT LAYOUT TABLE
+            //FORMMAIN
             //**********************************************************************//
-            //init part 
-            quadrantTopLeft = new Panel { BackColor = Color.WhiteSmoke };
-            quadrantTopRight = new Panel { BackColor = Color.White };
-            quadrantBottomLeft = new Panel { BackColor = Color.Gainsboro };
-            quadrantBottomRight = new Panel { BackColor = Color.LightGray };
+            //
+            this.AutoScaleMode = AutoScaleMode.Font;
+            this.ClientSize = new Size(720, 720);
+            this.Name = "FormMain";
+            this.Text = "Creative File Browser";
 
-            //the adjust layout portion will be handled in formmain - adjustlayout method
-            //to keep the modular nature of the code clean
-            //the build
+            this.Controls.Add(this.quadrantHostPanel);
+            this.Controls.Add(this.toolStripMain);
+            this.Load += new EventHandler(this.FormMain_Load);
+            this.ResumeLayout(false);
+            this.PerformLayout();
 
-
+            // Layout on init
+            this.AdjustLayout();
+            this.ResetQuadrantsToMiddle();
+        }
 
             //******************************************************************************//
             // Add Controls to Form (after all are initialized)
             //******************************************************************************//
-            this.Controls.Add(toolStripMain);
-            //this.Controls.Add(quadrantTopLeft);
-            //this.Controls.Add(quadrantTopRight);
-            //this.Controls.Add(quadrantBottomLeft);
-            //this.Controls.Add(quadrantBottomRight);
 
-            if (!this.Controls.Contains(toolStripMain))
-                this.Controls.Add(toolStripMain);
-
-            this.Controls.SetChildIndex(toolStripMain, 0);
             // ──────────────────────────────────────────────
             // Resize logic (moved into FormMain_Load)
             // ──────────────────────────────────────────────
 
             // Auto-resize handler // ask to use from the main form event / helper
-            //this.Resize += (_, _) => AdjustLayout();
-            //this.Load += (_, _) => AdjustLayout();
+    }
 
-        }
-
-        //**********************************************************************//
-        //TOOLSTRIP MENU IMAGE RENDERER
-        //**********************************************************************//
-        public class NoImageMarginRenderer : ToolStripProfessionalRenderer
+    //**********************************************************************//
+    //TOOLSTRIP MENU IMAGE RENDERER
+    //**********************************************************************//
+    public class NoImageMarginRenderer : ToolStripProfessionalRenderer
+    {
+        protected override void OnRenderImageMargin(ToolStripRenderEventArgs e)
         {
-            protected override void OnRenderImageMargin(ToolStripRenderEventArgs e)
-            {
-                // Do nothing = no margin rendered
-            }
+            // Do nothing = no margin rendered
         }
     }
 }
