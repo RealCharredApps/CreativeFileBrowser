@@ -248,6 +248,27 @@
             // 
             this.verticalSplit.Panel1.Controls.Add(this.horizontalTop);
             this.verticalSplit.Panel2.Controls.Add(this.horizontalBottom);
+            // Track and sync vertical split ratio
+            horizontalTop.SplitterMoved += (_, _) =>
+            {
+                horizontalRatioTop = (float)horizontalTop.SplitterDistance / ClientSize.Width;
+                horizontalBottom.SplitterDistance = (int)(ClientSize.Width * horizontalRatioTop);
+                horizontalRatioBottom = horizontalRatioTop;
+            };
+
+            horizontalBottom.SplitterMoved += (_, _) =>
+            {
+                horizontalRatioBottom = (float)horizontalBottom.SplitterDistance / ClientSize.Width;
+                horizontalTop.SplitterDistance = (int)(ClientSize.Width * horizontalRatioBottom);
+                horizontalRatioTop = horizontalRatioBottom;
+            };
+
+            verticalSplit.SplitterMoved += (_, _) =>
+            {
+                verticalRatio = (float)verticalSplit.SplitterDistance / ClientSize.Height;
+            };
+
+
 
             //******************************************************************************//
             // UI - organize the buttons with a separator line
@@ -280,7 +301,8 @@
             //**********************************************************************//
             //
             this.AutoScaleMode = AutoScaleMode.Font;
-            this.ClientSize = new Size(720, 720);
+            //default size of the form
+            this.ClientSize = new Size(940, 720);
             this.Name = "FormMain";
             this.Text = "Creative File Browser";
 
@@ -295,15 +317,15 @@
             this.ResetQuadrantsToMiddle();
         }
 
-            //******************************************************************************//
-            // Add Controls to Form (after all are initialized)
-            //******************************************************************************//
+        //******************************************************************************//
+        // Add Controls to Form (after all are initialized)
+        //******************************************************************************//
 
-            // ──────────────────────────────────────────────
-            // Resize logic (moved into FormMain_Load)
-            // ──────────────────────────────────────────────
+        // ──────────────────────────────────────────────
+        // Resize logic (moved into FormMain_Load)
+        // ──────────────────────────────────────────────
 
-            // Auto-resize handler // ask to use from the main form event / helper
+        // Auto-resize handler // ask to use from the main form event / helper
     }
 
     //**********************************************************************//

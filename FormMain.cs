@@ -10,6 +10,11 @@ namespace CreativeFileBrowser
         private Label labelSystemTitle, labelPreviewTitle, labelMonitoredTitle, labelGalleryTitle;
         private Panel panelSystemContent, panelPreviewContent, panelMonitoredContent, panelGalleryContent;
         private Panel quadrantHostPanel;
+        private float horizontalRatioTop = 0.5f;
+        private float horizontalRatioBottom = 0.5f;
+        private float verticalRatio = 0.5f;
+
+
 
         public FormMain()
         {
@@ -67,22 +72,20 @@ namespace CreativeFileBrowser
         protected override void OnResize(EventArgs e)
         {
             base.OnResize(e);
-            if (this.IsHandleCreated && horizontalTop != null && horizontalBottom != null)
-            {
-                // Optionally: only recenter on first load or if flag is set
-                // Otherwise: let user-dragged splits persist
-            }
 
-            if (verticalSplit == null || toolStripMain == null)
-            {
-                Console.WriteLine("Skipping resize: controls not ready.");
+            if (!this.IsHandleCreated || verticalSplit == null || horizontalTop == null || horizontalBottom == null)
                 return;
-            }
 
+            // Maintain vertical split ratio
+            verticalSplit.SplitterDistance = (int)(this.ClientSize.Height * verticalRatio);
 
+            horizontalTop.SplitterDistance = (int)(ClientSize.Width * horizontalRatioTop);
+            horizontalBottom.SplitterDistance = (int)(ClientSize.Width * horizontalRatioBottom);
         }
+
         private void ResetQuadrantsToMiddle()
         {
+
             if (verticalSplit != null)
                 verticalSplit.SplitterDistance = this.ClientSize.Height / 2;
 
