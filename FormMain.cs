@@ -12,7 +12,7 @@ namespace CreativeFileBrowser
         private Panel quadrantHostPanel;
         private float horizontalRatioTop = 0.5f;
         private float horizontalRatioBottom = 0.5f;
-        private float verticalRatio = 0.5f;
+        private float verticalRatio = 0.5f; 
 
 
 
