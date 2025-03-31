@@ -76,8 +76,6 @@
                 }
             });
 
-            //btnFileMenu.DropDownItems.Add("Save Current Workspace", null, (_, _) => SaveCurrentWorkspace());
-            //btnFileMenu.DropDownItems.Add("Remove Current Workspace", null, (_, _) => RemoveCurrentWorkspace());
             var itemSave = new ToolStripMenuItem("Save Current Workspace")
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Text,
@@ -93,6 +91,9 @@
                 Padding = new Padding(1),
             };
             itemRemove.Click += (_, _) => RemoveCurrentWorkspace();
+            btnFileMenu.DropDownItems.Clear();
+            btnFileMenu.DropDownItems.Add(itemSave);
+            btnFileMenu.DropDownItems.Add(itemRemove);
 
             btnFileMenu.DropDownItems.Add(new ToolStripSeparator());
 
@@ -203,6 +204,10 @@
                 "Default (Blank)", "Downloads", "Pictures"
             });
             this.workspaceDropDown.SelectedIndex = 0;
+            this.workspaceDropDown.SelectedIndexChanged += (_, _) =>
+            {
+                LoadWorkspaceByName(workspaceDropDown.SelectedItem?.ToString());
+            };
 
             //**********************************************************************//
             //END - TOOLSTRIP AT THE TOP

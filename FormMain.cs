@@ -1,6 +1,11 @@
 using System;
 using System.Windows.Forms;
 using System.Diagnostics;
+using System.Text.Json;
+using System.IO;
+using System.Linq;
+using System.Collections.Generic;
+using System.Drawing;
 
 namespace CreativeFileBrowser
 {
@@ -74,37 +79,79 @@ namespace CreativeFileBrowser
                 Font = new Font("Segoe UI", 9F),
                 SelectionMode = SelectionMode.One,
                 BorderStyle = BorderStyle.None,
-                DrawMode = DrawMode.OwnerDrawFixed,
             };
 
             listMonitoredFolders.SelectedIndexChanged += (_, _) =>
             {
                 listMonitoredFolders.Invalidate(); // trigger visual update
             };
+            listMonitoredFolders.DrawMode = DrawMode.OwnerDrawFixed;
+            listMonitoredFolders.SelectionMode = SelectionMode.MultiSimple;
 
             listMonitoredFolders.DrawItem += (s, e) =>
             {
                 if (e.Index < 0) return;
 
-                string text = listMonitoredFolders.Items[e.Index].ToString() ?? "";
-                bool selected = (e.State & DrawItemState.Selected) == DrawItemState.Selected;
+                string path = listMonitoredFolders.Items[e.Index].ToString() ?? "";
+                string name = Path.GetFileName(path.TrimEnd(Path.DirectorySeparatorChar));
 
-                e.Graphics.FillRectangle(
-                    new SolidBrush(selected ? Color.LightGray : Color.White),
-                    e.Bounds
-                );
+                bool isSelected = listMonitoredFolders.SelectedIndices.Contains(e.Index);
 
-                TextRenderer.DrawText(
-                    e.Graphics, text, e.Font, e.Bounds, Color.Black, TextFormatFlags.Left
-                );
+                Color backColor = isSelected ? Color.LightGray : Color.White;
+
+                using var bg = new SolidBrush(backColor);
+                e.Graphics.FillRectangle(bg, e.Bounds);
+
+                TextRenderer.DrawText(e.Graphics, name, e.Font, e.Bounds, Color.Black, TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
 
                 e.DrawFocusRectangle();
             };
+
+            var selectAllToggle = new Label
+            {
+                Text = "[ Select All ]",
+                AutoSize = true,
+                ForeColor = Color.LightGray,
+                Cursor = Cursors.Hand,
+                Font = new Font("Segoe UI", 9F, FontStyle.Underline),
+                Dock = DockStyle.Top,
+                Padding = new Padding(5),
+                TextAlign = ContentAlignment.MiddleLeft
+            };
+
+            bool allSelected = false;
+
+            selectAllToggle.Click += (_, _) =>
+            {
+                allSelected = !allSelected;
+                listMonitoredFolders.ClearSelected();
+
+                if (allSelected)
+                {
+                    for (int i = 0; i < listMonitoredFolders.Items.Count; i++)
+                        listMonitoredFolders.SetSelected(i, true);
+
+                    selectAllToggle.Text = "[ Deselect All ]";
+                }
+                else
+                {
+                    listMonitoredFolders.ClearSelected(); // ✅ Visually clears
+                    selectAllToggle.Text = "[ Select All ]";
+                }
+
+                listMonitoredFolders.Invalidate(); // 🔁 Force visual update
+            };
+
+
             panelMonitoredContent.Controls.Clear();
             panelMonitoredContent.Controls.Add(listMonitoredFolders);
+            panelMonitoredContent.Controls.Add(selectAllToggle); // add on top of list
+
 
             //loads system drives
             LoadSystemDrives();
+            LoadWorkspaces();
+            LoadLastSession();
         }
         //**********************************************************************//
         //ADJUST LAYOUT HELPER METHOD
@@ -272,6 +319,31 @@ namespace CreativeFileBrowser
             // 🔁 TODO: Load folder content into Preview Quadrant
         }
 
+        //select folder in treeview
+        private void SelectFolderInTree(string path)
+        {
+            foreach (TreeNode driveNode in treeSystemFolders.Nodes)
+            {
+                if (driveNode.Tag?.ToString() == path)
+                {
+                    treeSystemFolders.SelectedNode = driveNode;
+                    driveNode.Expand();
+                    return;
+                }
+
+                foreach (TreeNode child in driveNode.Nodes)
+                {
+                    if (child.Tag?.ToString() == path)
+                    {
+                        treeSystemFolders.SelectedNode = child;
+                        driveNode.Expand();
+                        child.Expand();
+                        return;
+                    }
+                }
+            }
+        }
+
         //**********************************************************************//
         //ADD MONITORED FOLDERS
         //**********************************************************************//
@@ -285,7 +357,7 @@ namespace CreativeFileBrowser
             try
             {
                 if (!Directory.Exists(path)) return;
-                if (monitoredPaths.Contains(path)) return;
+                if (monitoredPaths.Contains(path, StringComparer.OrdinalIgnoreCase)) return;
 
                 monitoredPaths.Add(path);
                 listMonitoredFolders.Items.Add(path);
@@ -335,14 +407,212 @@ namespace CreativeFileBrowser
 
         private void SaveCurrentWorkspace()
         {
-            MessageBox.Show("Workspace saved!", "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            string name = PromptForWorkspaceName();
+            if (string.IsNullOrWhiteSpace(name)) return;
+
+            var workspace = new Workspace
+            {
+                Name = name,
+                MonitoredFolders = new(monitoredPaths),
+                SelectedSystemFolder = treeSystemFolders.SelectedNode?.Tag?.ToString()
+            };
+
+            savedWorkspaces.Add(workspace);
+            workspaceDropDown.Items.Add(name);
+            workspaceDropDown.SelectedItem = name;
+
+            try
+            {
+                var json = JsonSerializer.Serialize(savedWorkspaces, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(WORKSPACES_FILE, json);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"❌ Failed to save workspace: {ex.Message}");
+            }
+
+            Debug.WriteLine($"✅ Workspace '{name}' saved.");
         }
+
+        private string PromptForWorkspaceName()
+        {
+            using (var prompt = new Form())
+            {
+                prompt.Width = 300;
+                prompt.Height = 150;
+                prompt.FormBorderStyle = FormBorderStyle.FixedDialog;
+                prompt.StartPosition = FormStartPosition.CenterParent; // ✅ Center over parent
+                prompt.Text = "Save Workspace";
+                prompt.TopMost = true; // ✅ Always on top
+
+                var textLabel = new Label() { Left = 20, Top = 15, Text = "Workspace name:" };
+                var textBox = new TextBox { Left = 20, Top = 20, Width = 240 };
+                var buttonSave = new Button { Text = "Save", Left = 170, Width = 90, Top = 50 };
+
+                string result = "";
+                buttonSave.Click += (_, _) => { result = textBox.Text; prompt.Close(); };
+
+                prompt.Controls.Add(textLabel);
+                prompt.Controls.Add(textBox);
+                prompt.Controls.Add(buttonSave);
+                prompt.AcceptButton = buttonSave;
+
+                if (prompt.ShowDialog(this) == DialogResult.OK)
+                {
+                    return textBox.Text.Trim();
+                }
+
+                return string.Empty;
+            }
+        }
+
 
         private void RemoveCurrentWorkspace()
         {
-            MessageBox.Show("Workspace removed!", "Remove", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            var selectedName = workspaceDropDown.SelectedItem?.ToString();
+            if (string.IsNullOrWhiteSpace(selectedName))
+            {
+                MessageBox.Show("No workspace selected.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            var confirm = MessageBox.Show(
+                $"Remove workspace '{selectedName}'?",
+                "Confirm",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning);
+
+            if (confirm != DialogResult.Yes) return;
+
+            savedWorkspaces.RemoveAll(ws => ws.Name == selectedName);
+
+            try
+            {
+                File.WriteAllText(WORKSPACES_FILE, JsonSerializer.Serialize(savedWorkspaces, new JsonSerializerOptions { WriteIndented = true }));
+                Debug.WriteLine($"✅ Workspace '{selectedName}' removed.");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"❌ Failed to save workspace removal: {ex.Message}");
+            }
+
+            workspaceDropDown.Items.Remove(selectedName);
+            workspaceDropDown.SelectedItem = null;
+            currentWorkspace = new Workspace();
+
+            monitoredPaths.Clear();
+            listMonitoredFolders.Items.Clear();
         }
 
+
+        //**********************************************************************//
+        //REAL WORKSPACES - add manager helpers
+        //**********************************************************************//
+        private const string WORKSPACES_FILE = "workspaces.json";
+
+        private List<Workspace> savedWorkspaces = new();
+        private Workspace currentWorkspace = new();
+
+        private void LoadWorkspaces()
+        {
+            try
+            {
+                if (!File.Exists(WORKSPACES_FILE))
+                {
+                    savedWorkspaces = new();
+                    File.WriteAllText(WORKSPACES_FILE, "[]");
+                    return;
+                }
+                workspaceDropDown.Items.Clear();
+
+                var json = File.ReadAllText(WORKSPACES_FILE);
+                savedWorkspaces = JsonSerializer.Deserialize<List<Workspace>>(json) ?? new();
+                foreach (var ws in savedWorkspaces)
+                {
+                    workspaceDropDown.Items.Add(ws.Name);
+                }
+
+                // Optionally select the last one
+                if (savedWorkspaces.Count > 0)
+                    workspaceDropDown.SelectedItem = savedWorkspaces.Last().Name;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"⚠ Failed to load workspaces: {ex.Message}");
+                savedWorkspaces = new(); // fallback
+            }
+        }
+
+        private void LoadWorkspaceByName(string? name)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return;
+
+            var match = savedWorkspaces.FirstOrDefault(w => w.Name == name);
+            if (match == null) return;
+
+            currentWorkspace = match;
+
+            // Clear current monitored state
+            monitoredPaths.Clear();
+            listMonitoredFolders.Items.Clear();
+
+            foreach (var path in match.MonitoredFolders.Distinct(StringComparer.OrdinalIgnoreCase))
+            {
+                try
+                {
+                    if (!Directory.Exists(path)) continue;
+                    if (monitoredPaths.Contains(path, StringComparer.OrdinalIgnoreCase)) continue;
+
+                    monitoredPaths.Add(path);
+                    listMonitoredFolders.Items.Add(path);
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    Debug.WriteLine($"🔒 Skipped {path} (access denied): {ex.Message}");
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"❌ Failed to load monitored folder: {path} - {ex.Message}");
+                }
+            }
+
+
+            // Select system folder if one was saved
+            if (!string.IsNullOrWhiteSpace(match.SelectedSystemFolder))
+            {
+                SelectFolderInTree(match.SelectedSystemFolder);
+            }
+
+            Debug.WriteLine($"✅ Workspace '{name}' loaded.");
+        }
+
+        //**********************************************************************//
+        //JSON basic screen
+        //**********************************************************************//
+        //JSON workspaces
+        private void LoadLastSession()
+        {
+            var last = savedWorkspaces.LastOrDefault();
+            if (last == null) return;
+
+            currentWorkspace = last;
+
+            foreach (var path in currentWorkspace.MonitoredFolders.Distinct(StringComparer.OrdinalIgnoreCase))
+            {
+                try
+                {
+                    if (!Directory.Exists(path)) continue;
+                    if (monitoredPaths.Contains(path, StringComparer.OrdinalIgnoreCase)) continue;
+
+                    monitoredPaths.Add(path);
+                    listMonitoredFolders.Items.Add(path);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"⚠ Skipped monitored folder '{path}': {ex.Message}");
+                }
+            }
+        }
 
     }
 }
