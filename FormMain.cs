@@ -44,13 +44,6 @@ namespace CreativeFileBrowser
         {
             // Apply actual top padding now that ToolStrip has rendered
             quadrantHostPanel.Padding = new Padding(0, 0, 0, 0);
-            // Optional test
-            //panelSystemContent.Controls.Add(new Label
-            //{
-            //    Text = " Panel visible",
-            //    Dock = DockStyle.Top,
-            //    ForeColor = Color.Green
-            //});
 
             //treeview for system folders - format
             treeSystemFolders = new TreeView
@@ -163,6 +156,9 @@ namespace CreativeFileBrowser
             foreach (var drive in DriveInfo.GetDrives().Where(d => d.IsReady))
             {
                 string displayName = $"{drive.VolumeLabel} ({drive.Name.TrimEnd('\\')})";
+                    ? drive.Name
+                    : $"{drive.VolumeLabel} ({drive.Name.TrimEnd('\\')})";
+
                 var node = new TreeNode(string.IsNullOrWhiteSpace(drive.VolumeLabel) ? drive.Name : displayName)
                 {
                     Tag = drive.RootDirectory.FullName
