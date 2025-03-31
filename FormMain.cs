@@ -155,7 +155,7 @@ namespace CreativeFileBrowser
 
             foreach (var drive in DriveInfo.GetDrives().Where(d => d.IsReady))
             {
-                string displayName = $"{drive.VolumeLabel} ({drive.Name.TrimEnd('\\')})";
+                string displayName = string.IsNullOrWhiteSpace(drive.VolumeLabel)
                     ? drive.Name
                     : $"{drive.VolumeLabel} ({drive.Name.TrimEnd('\\')})";
 
@@ -174,39 +174,59 @@ namespace CreativeFileBrowser
             if (node.Nodes.Count == 1 && node.Nodes[0].Text == "...")
             {
                 node.Nodes.Clear();
+
+                string path = node.Tag as string ?? "";
+
                 try
                 {
-                    string path = node.Tag as string ?? "";
-                    var dirs = Directory.GetDirectories(path);
-
-                    foreach (var dir in dirs)
+                    foreach (var dir in Directory.EnumerateDirectories(path))
                     {
                         try
                         {
-                            var subNode = new TreeNode(Path.GetFileName(dir))
+                            var name = Path.GetFileName(dir);
+                            if (string.IsNullOrWhiteSpace(name)) continue;
+
+                            var subNode = new TreeNode(name)
                             {
                                 Tag = dir
                             };
 
-                            // Check if subfolder has children
-                            if (Directory.GetDirectories(dir).Length > 0)
+                            // Only add child node if there are subdirs
+                            if (Directory.EnumerateDirectories(dir).Any())
                                 subNode.Nodes.Add("...");
 
                             node.Nodes.Add(subNode);
                         }
-                        catch { continue; }
+                        catch (UnauthorizedAccessException uaEx)
+                        {
+                            Debug.WriteLine($"🔒 Permission denied: {dir} - {uaEx.Message}");
+                            continue;
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"❌ Error expanding {dir}: {ex.Message}");
+                            continue;
+                        }
                     }
                 }
-                catch { }
+                catch (UnauthorizedAccessException uaEx)
+                {
+                    Debug.WriteLine($"🔒 Root permission denied: {path} - {uaEx.Message}");
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"❌ Failed to expand {path}: {ex.Message}");
+                }
             }
         }
 
+        //preview load
         private void TreeSystemFolders_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
         {
             treeSystemFolders.SelectedNode = e.Node;
             string path = e.Node.Tag as string ?? "";
 
-            Console.WriteLine("Selected: " + path);
+            Debug.WriteLine("📁 Folder selected: " + path);
             // 🔁 TODO: Load folder content into Preview Quadrant
         }
 
