@@ -1,22 +1,11 @@
 [
   {
-    "Name": "Quick Local",
+    "Name": "another",
     "MonitoredFolders": [
-      "C:\\Users\\Justin.Sjaaheim\\Downloads",
-      "C:\\Users\\Justin.Sjaaheim\\Documents",
-      "C:\\Users\\Justin.Sjaaheim\\Pictures"
+      "D:\\3 11 25 TP Idea 1 - Roleplays 1 - CPC",
+      "D:\\3 12 25 TP idea 4 - Control 1 - MCPFCP",
+      "D:\\2 28 25 TP gfx appleee ad refresh idea 5 storyboard pngs"
     ],
-    "SelectedSystemFolder": "C:\\"
-  },
-  {
-    "Name": "Top LVL",
-    "MonitoredFolders": [
-      "C:\\Users\\Justin.Sjaaheim\\Downloads",
-      "C:\\Users\\Justin.Sjaaheim\\Documents",
-      "C:\\Users\\Justin.Sjaaheim\\Pictures",
-      "U:\\_Projects",
-      "U:\\_Footage_Stills"
-    ],
-    "SelectedSystemFolder": "U:\\_Footage_Stills"
+    "SelectedSystemFolder": "D:\\2 28 25 TP gfx appleee ad refresh idea 5 storyboard pngs"
   }
 ]

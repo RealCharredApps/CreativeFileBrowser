@@ -21,6 +21,10 @@ namespace CreativeFileBrowser
         private TreeView treeSystemFolders;
         private ListBox listMonitoredFolders;
         private List<string> monitoredPaths = new();
+        private const string WORKSPACES_FILE = "workspaces.json";
+
+        private List<Workspace> savedWorkspaces = new();
+        private Workspace currentWorkspace = new();
 
 
         public FormMain()
@@ -47,6 +51,22 @@ namespace CreativeFileBrowser
         //**********************************************************************//
         private void FormMain_Load(object sender, EventArgs e)
         {
+            //toolbar updates -- workspaces
+            WorkspaceManager.LoadWorkspacesFromFile();
+
+            workspaceDropDown.Items.Clear();
+            foreach (var ws in WorkspaceManager.SavedWorkspaces.OrderBy(w => w.Name))
+                workspaceDropDown.Items.Add(ws.Name);
+
+            // Optionally preload last used
+            if (workspaceDropDown.Items.Count > 0)
+                workspaceDropDown.SelectedIndex = 0;
+
+            workspaceDropDown.SelectedIndexChanged += (_, _) =>
+            {
+                LoadWorkspaceByName(workspaceDropDown.SelectedItem?.ToString());
+            };
+
             // Apply actual top padding now that ToolStrip has rendered
             quadrantHostPanel.Padding = new Padding(0, 0, 0, 0);
 
@@ -402,36 +422,70 @@ namespace CreativeFileBrowser
         }
 
         //**********************************************************************//
-        //DUMMY METHOD - SAVEWORKSPACES
+        //WORKSPACE METHODS
         //**********************************************************************//
-
         private void SaveCurrentWorkspace()
         {
             string name = PromptForWorkspaceName();
+            //test
+            MessageBox.Show("entered name: " + name);
+
             if (string.IsNullOrWhiteSpace(name)) return;
 
-            var workspace = new Workspace
+            var existing = WorkspaceManager.SavedWorkspaces.FirstOrDefault(w =>
+                w.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+
+            if (existing != null)
+            {
+                var confirm = MessageBox.Show(
+                    $"Workspace '{name}' already exists.\nOverwrite it?",
+                    "Confirm Overwrite",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Warning);
+
+                if (confirm != DialogResult.Yes)
+                    return;
+
+                //debug test
+                MessageBox.Show(
+                "DEBUG:\n" +
+                $"Workspaces before save: {WorkspaceManager.SavedWorkspaces.Count}\n" +
+                $"Name to save: {name}\n" +
+                $"Folders: {string.Join(", ", monitoredPaths)}"
+                );
+
+                WorkspaceManager.SavedWorkspaces.Remove(existing);
+            }
+
+            var newWorkspace = new Workspace
             {
                 Name = name,
                 MonitoredFolders = new(monitoredPaths),
                 SelectedSystemFolder = treeSystemFolders.SelectedNode?.Tag?.ToString()
             };
+            // 🔁 Refresh dropdown list
+            workspaceDropDown.Items.Clear();
+            foreach (var ws in WorkspaceManager.SavedWorkspaces.OrderBy(w => w.Name))
+                workspaceDropDown.Items.Add(ws.Name);
+            WorkspaceManager.SavedWorkspaces.Add(newWorkspace);
+            WorkspaceManager.SaveWorkspacesToFile();
 
-            savedWorkspaces.Add(workspace);
-            workspaceDropDown.Items.Add(name);
+            //debug test
+            string jsonDebug = File.Exists("workspaces.json")
+                ? File.ReadAllText("workspaces.json")
+                : "[File not found]";
+
+            MessageBox.Show(
+                "DEBUG AFTER SAVE:\n" +
+                $"Saved count: {WorkspaceManager.SavedWorkspaces.Count}\n" +
+                $"JSON exists: {File.Exists("workspaces.json")}\n" +
+                $"JSON content:\n{jsonDebug}"
+            );
+
+            //else
+            WorkspaceManager.LoadWorkspacesFromFile(); // ✅ <--- Refresh in-memory state
+            RefreshWorkspaceDropdown();
             workspaceDropDown.SelectedItem = name;
-
-            try
-            {
-                var json = JsonSerializer.Serialize(savedWorkspaces, new JsonSerializerOptions { WriteIndented = true });
-                File.WriteAllText(WORKSPACES_FILE, json);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"❌ Failed to save workspace: {ex.Message}");
-            }
-
-            Debug.WriteLine($"✅ Workspace '{name}' saved.");
         }
 
         private string PromptForWorkspaceName()
@@ -439,32 +493,56 @@ namespace CreativeFileBrowser
             using (var prompt = new Form())
             {
                 prompt.Width = 300;
-                prompt.Height = 150;
+                prompt.Height = 140;
                 prompt.FormBorderStyle = FormBorderStyle.FixedDialog;
-                prompt.StartPosition = FormStartPosition.CenterParent; // ✅ Center over parent
+                prompt.StartPosition = FormStartPosition.CenterParent;
                 prompt.Text = "Save Workspace";
-                prompt.TopMost = true; // ✅ Always on top
+                prompt.TopMost = true;
+                prompt.MinimizeBox = false;
+                prompt.MaximizeBox = false;
+                prompt.ShowInTaskbar = false;
 
-                var textLabel = new Label() { Left = 20, Top = 15, Text = "Workspace name:" };
-                var textBox = new TextBox { Left = 20, Top = 20, Width = 240 };
-                var buttonSave = new Button { Text = "Save", Left = 170, Width = 90, Top = 50 };
+                var textBox = new TextBox
+                {
+                    Left = 20,
+                    Top = 20,
+                    Width = 240
+                };
 
-                string result = "";
-                buttonSave.Click += (_, _) => { result = textBox.Text; prompt.Close(); };
+                var buttonSave = new Button
+                {
+                    Text = "Save",
+                    DialogResult = DialogResult.OK,
+                    Left = 170,
+                    Width = 90,
+                    Top = 50
+                };
 
-                prompt.Controls.Add(textLabel);
+                var buttonCancel = new Button
+                {
+                    Text = "Cancel",
+                    DialogResult = DialogResult.Cancel,
+                    Left = 70,
+                    Width = 90,
+                    Top = 50
+                };
+
                 prompt.Controls.Add(textBox);
                 prompt.Controls.Add(buttonSave);
+                prompt.Controls.Add(buttonCancel);
                 prompt.AcceptButton = buttonSave;
+                prompt.CancelButton = buttonCancel;
 
-                if (prompt.ShowDialog(this) == DialogResult.OK)
-                {
-                    return textBox.Text.Trim();
-                }
+                // ⌨ Focus textbox on open
+                prompt.Shown += (_, _) => textBox.Focus();
 
-                return string.Empty;
+                var result = prompt.ShowDialog();
+                return result == DialogResult.OK
+                    ? textBox.Text.Trim()
+                    : "";
             }
         }
+
 
 
         private void RemoveCurrentWorkspace()
@@ -506,13 +584,8 @@ namespace CreativeFileBrowser
 
 
         //**********************************************************************//
-        //REAL WORKSPACES - add manager helpers
+        //WORKSPACES - add manager helpers
         //**********************************************************************//
-        private const string WORKSPACES_FILE = "workspaces.json";
-
-        private List<Workspace> savedWorkspaces = new();
-        private Workspace currentWorkspace = new();
-
         private void LoadWorkspaces()
         {
             try
@@ -527,7 +600,7 @@ namespace CreativeFileBrowser
 
                 var json = File.ReadAllText(WORKSPACES_FILE);
                 savedWorkspaces = JsonSerializer.Deserialize<List<Workspace>>(json) ?? new();
-                foreach (var ws in savedWorkspaces)
+                foreach (var ws in savedWorkspaces.DistinctBy(w => w.Name))
                 {
                     workspaceDropDown.Items.Add(ws.Name);
                 }
@@ -561,8 +634,6 @@ namespace CreativeFileBrowser
                 try
                 {
                     if (!Directory.Exists(path)) continue;
-                    if (monitoredPaths.Contains(path, StringComparer.OrdinalIgnoreCase)) continue;
-
                     monitoredPaths.Add(path);
                     listMonitoredFolders.Items.Add(path);
                 }
@@ -582,9 +653,22 @@ namespace CreativeFileBrowser
             {
                 SelectFolderInTree(match.SelectedSystemFolder);
             }
-
             Debug.WriteLine($"✅ Workspace '{name}' loaded.");
+            listMonitoredFolders.Invalidate(); // 🧼 Force redraw
+
         }
+        //**********************************************************************//
+        //WORKSPACE MENU - REFRESHER
+        //**********************************************************************//
+        private void RefreshWorkspaceDropdown()
+        {
+            workspaceDropDown.Items.Clear();
+            foreach (var name in WorkspaceManager.GetAllWorkspaceNames())
+                workspaceDropDown.Items.Add(name);
+        }
+        //**********************************************************************//
+        //END WORKSPACE MENU - REFRESHER
+        //**********************************************************************//
 
         //**********************************************************************//
         //JSON basic screen
