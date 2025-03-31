@@ -14,8 +14,8 @@ namespace CreativeFileBrowser
         private float horizontalRatioBottom = 0.5f;
         private float verticalRatio = 0.5f;
         private TreeView treeSystemFolders;
-
-
+        private ListBox listMonitoredFolders;
+        private List<string> monitoredPaths = new();
 
 
         public FormMain()
@@ -62,6 +62,48 @@ namespace CreativeFileBrowser
 
             panelSystemContent.Controls.Clear(); // Clear test label
             panelSystemContent.Controls.Add(treeSystemFolders);
+
+            //connect the add monitored folder button to the treeview
+            btnAddFolder.Click += (_, _) => AddMonitoredFolderFromTree();
+            btnRemoveFolder.Click += (_, _) => RemoveSelectedMonitoredFolder();
+
+            //listbox for monitored folders - format
+            listMonitoredFolders = new ListBox
+            {
+                Dock = DockStyle.Fill,
+                Font = new Font("Segoe UI", 9F),
+                SelectionMode = SelectionMode.One,
+                BorderStyle = BorderStyle.None,
+                DrawMode = DrawMode.OwnerDrawFixed,
+            };
+
+            listMonitoredFolders.SelectedIndexChanged += (_, _) =>
+            {
+                listMonitoredFolders.Invalidate(); // trigger visual update
+            };
+
+            listMonitoredFolders.DrawItem += (s, e) =>
+            {
+                if (e.Index < 0) return;
+
+                string text = listMonitoredFolders.Items[e.Index].ToString() ?? "";
+                bool selected = (e.State & DrawItemState.Selected) == DrawItemState.Selected;
+
+                e.Graphics.FillRectangle(
+                    new SolidBrush(selected ? Color.LightGray : Color.White),
+                    e.Bounds
+                );
+
+                TextRenderer.DrawText(
+                    e.Graphics, text, e.Font, e.Bounds, Color.Black, TextFormatFlags.Left
+                );
+
+                e.DrawFocusRectangle();
+            };
+            panelMonitoredContent.Controls.Clear();
+            panelMonitoredContent.Controls.Add(listMonitoredFolders);
+
+            //loads system drives
             LoadSystemDrives();
         }
         //**********************************************************************//
@@ -230,6 +272,53 @@ namespace CreativeFileBrowser
             // 🔁 TODO: Load folder content into Preview Quadrant
         }
 
+        //**********************************************************************//
+        //ADD MONITORED FOLDERS
+        //**********************************************************************//
+        private void AddMonitoredFolderFromTree()
+        {
+            if (treeSystemFolders.SelectedNode == null) return;
+
+            string path = treeSystemFolders.SelectedNode.Tag as string ?? "";
+            if (string.IsNullOrWhiteSpace(path)) return;
+
+            try
+            {
+                if (!Directory.Exists(path)) return;
+                if (monitoredPaths.Contains(path)) return;
+
+                monitoredPaths.Add(path);
+                listMonitoredFolders.Items.Add(path);
+            }
+            catch (UnauthorizedAccessException uaEx)
+            {
+                Debug.WriteLine($"🔒 Add error: {path} - {uaEx.Message}");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"❌ Add error: {path} - {ex.Message}");
+            }
+        }
+        //REMOVE MONITORED FOLDERS
+        private void RemoveSelectedMonitoredFolder()
+        {
+            if (listMonitoredFolders.SelectedIndex == -1) return;
+
+            try
+            {
+                int index = listMonitoredFolders.SelectedIndex;
+                string path = listMonitoredFolders.Items[index].ToString() ?? "";
+
+                monitoredPaths.Remove(path);
+                listMonitoredFolders.Items.RemoveAt(index);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"❌ Remove error: {ex.Message}");
+            }
+        }
+
+
 
         //**********************************************************************//
         //DUMMY METHOD - LOADIMAGESFOLDER
@@ -253,8 +342,6 @@ namespace CreativeFileBrowser
         {
             MessageBox.Show("Workspace removed!", "Remove", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
-
-
 
 
     }
