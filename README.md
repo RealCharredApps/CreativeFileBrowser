@@ -1,6 +1,3 @@
-# CreativeFileBrowser_Winforms
-CreativeFileBrowser is a lightweight visual file explorer for creatives. Instantly preview images, videos, and assets from system or monitored folders. Save custom workspaces, auto-refresh views, and browse deeply nested folders with speed and simplicity.
-
 🖼️ CreativeFileBrowser
 CreativeFileBrowser is a lightweight, visual-first file browser tailored for creatives, editors, and visual designers. It makes navigating and previewing images, videos, and other creative assets fast and seamless — without needing to dig through complex folders or worry about file types.
 
