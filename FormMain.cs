@@ -501,11 +501,14 @@ namespace CreativeFileBrowser
         //**********************************************************************//
         private async void LoadMonitoredGallery()
         {
+            if (panelGalleryContent == null) return;
             panelGalleryContent.Controls.Clear();
+
+            var foldersSnapshot = monitoredPaths.ToList();
 
             await Task.Run(() =>
             {
-                foreach (var folder in monitoredPaths)
+                foreach (var folder in foldersSnapshot)
                 {
                     if (!Directory.Exists(folder)) continue;
 
@@ -514,18 +517,29 @@ namespace CreativeFileBrowser
                     {
                         if (!File.Exists(file)) continue;
 
-                        var thumb = FileThumbnailService.GenerateProportionalThumbnail(file, 160);
-                        if (thumb == null) continue;
-
-                        Invoke(() =>
+                        try
                         {
-                            var imagePanel = CreateThumbnailPanel(file, thumb);
-                            panelGalleryContent.Controls.Add(imagePanel);
-                        });
+                            var thumb = FileThumbnailService.GenerateProportionalThumbnail(file, 160);
+                            if (thumb == null) continue;
+
+                            Invoke(() =>
+                            {
+                                var imagePanel = CreateThumbnailPanel(file, thumb);
+                                panelGalleryContent.Controls.Add(imagePanel);
+                                MonitoredGalleryService.LoadThumbnailsParallel(monitoredPaths, panelGalleryContent);
+                            });
+                        }
+                        catch (OutOfMemoryException)
+                        {
+                            GC.Collect();
+                            continue;
+                        }
+                        catch { continue; }
                     }
                 }
             });
         }
+
 
         private Panel CreateThumbnailPanel(string file, Image thumb)
         {
