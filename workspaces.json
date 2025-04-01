@@ -35,5 +35,20 @@
       "D:\\Common GFX"
     ],
     "SelectedSystemFolder": "D:\\Common GFX"
+  },
+  {
+    "Name": "Local Downloads",
+    "MonitoredFolders": [
+      "C:\\Users\\Justin.Sjaaheim\\Downloads"
+    ],
+    "SelectedSystemFolder": "C:\\Users\\Justin.Sjaaheim\\Downloads"
+  },
+  {
+    "Name": "Local Vis - DL x SS",
+    "MonitoredFolders": [
+      "C:\\Users\\Justin.Sjaaheim\\Downloads",
+      "C:\\Users\\Justin.Sjaaheim\\Pictures"
+    ],
+    "SelectedSystemFolder": "C:\\Users\\Justin.Sjaaheim\\Pictures"
   }
 ]

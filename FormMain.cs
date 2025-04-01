@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using System.Drawing;
+using CreativeFileBrowser.Services;
 
 namespace CreativeFileBrowser
 {
@@ -27,7 +28,7 @@ namespace CreativeFileBrowser
 
         private List<Workspace> savedWorkspaces = new();
         private Workspace currentWorkspace = new();
-
+        private FlowLayoutPanel panelFolderPreview;
 
         public FormMain()
         {
@@ -198,6 +199,13 @@ namespace CreativeFileBrowser
 
             //loads system drives
             LoadSystemDrives();
+            if (treeSystemFolders.Nodes.Count > 0)
+            {
+                var firstDrive = treeSystemFolders.Nodes[0];
+                treeSystemFolders.SelectedNode = firstDrive;
+                FolderPreviewService.LoadThumbnails(firstDrive.Tag?.ToString(), panelFolderPreview);
+            }
+
             LoadWorkspaces();
             LoadLastSession();
         }
@@ -213,6 +221,18 @@ namespace CreativeFileBrowser
 
             horizontalTop.Panel1.Controls.Add(CreateQuadrant("System Folders", out labelSystemTitle, out panelSystemContent));
             horizontalTop.Panel2.Controls.Add(CreateQuadrant("Folder Preview", out labelPreviewTitle, out panelPreviewContent));
+            panelFolderPreview = new FlowLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                AutoScroll = true,
+                BackColor = Color.WhiteSmoke,
+                WrapContents = true,
+                Padding = new Padding(10)
+            };
+
+            panelPreviewContent.Controls.Clear();
+            panelPreviewContent.Controls.Add(panelFolderPreview);
+
             horizontalBottom.Panel1.Controls.Add(CreateQuadrant("Monitored Folders", out labelMonitoredTitle, out panelMonitoredContent));
             horizontalBottom.Panel2.Controls.Add(CreateQuadrant("Monitored Gallery", out labelGalleryTitle, out panelGalleryContent));
         }
@@ -364,7 +384,10 @@ namespace CreativeFileBrowser
             string path = e.Node.Tag as string ?? "";
 
             Debug.WriteLine("📁 Folder selected: " + path);
-            // 🔁 TODO: Load folder content into Preview Quadrant
+            if (!string.IsNullOrWhiteSpace(path) && panelFolderPreview != null)
+            {
+                FolderPreviewService.LoadThumbnails(path, panelFolderPreview);
+            }
         }
 
         //select folder in treeview
@@ -375,6 +398,7 @@ namespace CreativeFileBrowser
                 if (driveNode.Tag?.ToString() == path)
                 {
                     treeSystemFolders.SelectedNode = driveNode;
+                    FolderPreviewService.LoadThumbnails(path, panelFolderPreview);
                     driveNode.Expand();
                     return;
                 }
@@ -384,6 +408,7 @@ namespace CreativeFileBrowser
                     if (child.Tag?.ToString() == path)
                     {
                         treeSystemFolders.SelectedNode = child;
+                        FolderPreviewService.LoadThumbnails(path, panelFolderPreview);
                         driveNode.Expand();
                         child.Expand();
                         return;
