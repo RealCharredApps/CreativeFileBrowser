@@ -6,7 +6,7 @@ namespace CreativeFileBrowser.Services;
 
 public static class FolderPreviewService
 {
-    private static readonly string[] allowedExtensions = new[]
+    public static readonly string[] allowedExtensions = new[]
     {
         ".png", ".jpg", ".jpeg", ".gif", ".webp",
         ".mp4", ".mov", ".psd", ".tiff", ".bmp", ".raw", ".heic"

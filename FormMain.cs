@@ -25,6 +25,7 @@ namespace CreativeFileBrowser
         private const string WORKSPACES_FILE = "workspaces.json";
         private AppSettings appSettings;
 
+        private List<FolderWatcherService> activeWatchers = new();
 
         private List<Workspace> savedWorkspaces = new();
         private Workspace currentWorkspace = new();
@@ -195,6 +196,14 @@ namespace CreativeFileBrowser
                 Debug.WriteLine("❌ listMonitoredFolders is null at this point!");
 
             panelMonitoredContent.Controls.Add(selectAllToggle); // add on top of list
+
+            //monitored folder previews panel
+            foreach (var path in monitoredPaths)
+            {
+                var watcher = new FolderWatcherService(path, () => Invoke(LoadMonitoredGallery));
+                watcher.Start();
+                activeWatchers.Add(watcher);
+            }
 
 
             //loads system drives
@@ -433,6 +442,7 @@ namespace CreativeFileBrowser
                 if (monitoredPaths.Contains(path, StringComparer.OrdinalIgnoreCase)) return;
 
                 monitoredPaths.Add(path);
+                LoadMonitoredGallery();
                 listMonitoredFolders.Items.Add(path);
             }
             catch (UnauthorizedAccessException uaEx)
@@ -456,6 +466,7 @@ namespace CreativeFileBrowser
 
                 monitoredPaths.Remove(path);
                 listMonitoredFolders.Items.RemoveAt(index);
+                LoadMonitoredGallery();
             }
             catch (Exception ex)
             {
@@ -472,6 +483,60 @@ namespace CreativeFileBrowser
         {
             var selectedTypes = fileTypeChecklist.CheckedItems.Cast<string>().ToList();
             Console.WriteLine("Selected extensions: " + string.Join(", ", selectedTypes));
+        }
+        //**********************************************************************//
+        //LOAD MONITORED FOLDERS - GALLERY
+        //**********************************************************************//
+        private void LoadMonitoredGallery()
+        {
+            panelGalleryContent.Controls.Clear();
+
+            foreach (var folder in monitoredPaths)
+            {
+                if (!Directory.Exists(folder)) continue;
+
+                foreach (var file in Directory.EnumerateFiles(folder, "*.*", SearchOption.AllDirectories)
+                         .Where(f => FolderPreviewService.allowedExtensions.Contains(Path.GetExtension(f).ToLowerInvariant())))
+                {
+                    var thumb = FileThumbnailService.GenerateProportionalThumbnail(file, 160);
+                    if (thumb == null) continue;
+
+                    var imagePanel = new Panel
+                    {
+                        Width = 160,
+                        Height = 180,
+                        Margin = new Padding(6)
+                    };
+
+                    var pic = new PictureBox
+                    {
+                        Image = thumb,
+                        Width = 160,
+                        Height = 160,
+                        SizeMode = PictureBoxSizeMode.Zoom,
+                        Dock = DockStyle.Top,
+                        Cursor = Cursors.Hand,
+                        Tag = file
+                    };
+
+                    var label = new Label
+                    {
+                        Text = Path.GetFileName(file),
+                        Dock = DockStyle.Bottom,
+                        Font = new Font("Segoe UI", 8),
+                        TextAlign = ContentAlignment.MiddleCenter,
+                        Height = 20
+                    };
+
+                    pic.Click += (_, _) =>
+                        Process.Start("explorer.exe", $"/select,\"{file}\"");
+
+                    imagePanel.Controls.Add(pic);
+                    imagePanel.Controls.Add(label);
+
+                    panelGalleryContent.Controls.Add(imagePanel);
+                }
+            }
         }
 
         //**********************************************************************//
