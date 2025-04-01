@@ -1,0 +1,15 @@
+[33mee4fd52[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeature/Workspaces_WindowState_ClearMonitoredFolders[m[33m)[m Clear mon folders added to filemenu WORKS - WindowState set to a default quad view WORKS - WS TBD
+[33m1e5eeec[m[33m ([m[1;31morigin/main[m[33m, [m[1;32mmain[m[33m)[m Initial commit - syncing remote repo with local proj
+[33m2b45925[m Improved f(x) of saving/removing workspaces - actually shows up in menu dropdown
+[33m167d724[m Cleaned up interactive UI Mon Folders - Added Selection interaction color responsiveness
+[33m12e7321[m Add/Remove monitored folders with buttons from Sys Folders list
+[33m2f478f6[m Updating exception handling and f(x) for sys folders feature Q1
+[33m7c35898[m building in initial exception handling for sys folder permission error handling
+[33mc3d9aeb[m Building out Quadrants - 1 System Folders - View 1
+[33mb764140[m ✅ Save clean quadrant layout before adding TreeView
+[33m55bfe2f[m Clean quadrant UI layout: synced splits, toolbar padding, responsive design
+[33m99e6f1c[m Refined UI - Toolstrip x Quadrant f(x) smooth without overlap
+[33m1a0a43f[m Initial commit of working Creative File Browser Winforms App
+[33md5f4208[m Update README.md
+[33m9fc9727[m Update README.md
+[33m8e1c866[m Initial commit
