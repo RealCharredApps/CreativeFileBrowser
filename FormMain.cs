@@ -22,6 +22,8 @@ namespace CreativeFileBrowser
         private ListBox listMonitoredFolders;
         private List<string> monitoredPaths = new();
         private const string WORKSPACES_FILE = "workspaces.json";
+        private AppSettings appSettings;
+
 
         private List<Workspace> savedWorkspaces = new();
         private Workspace currentWorkspace = new();
@@ -51,6 +53,28 @@ namespace CreativeFileBrowser
         //**********************************************************************//
         private void FormMain_Load(object sender, EventArgs e)
         {
+            //appSettings on Load
+            appSettings = SettingsManager.Load();
+            this.Width = appSettings.Width;
+            this.Height = appSettings.Height;
+            this.Top = appSettings.Top;
+            this.Left = appSettings.Left;
+
+            verticalSplit.SplitterDistance = appSettings.VerticalSplit;
+            horizontalTop.SplitterDistance = appSettings.HorizontalTopSplit;
+            horizontalBottom.SplitterDistance = appSettings.HorizontalBottomSplit;
+
+            //get that last monitored folders list on load
+            monitoredPaths.Clear();
+            foreach (var path in appSettings.MonitoredFolders)
+            {
+                if (Directory.Exists(path))
+                {
+                    monitoredPaths.Add(path);
+                    listMonitoredFolders.Items.Add(path);
+                }
+            }
+
             //toolbar updates -- workspaces
             WorkspaceManager.LoadWorkspacesFromFile();
 
@@ -162,9 +186,13 @@ namespace CreativeFileBrowser
                 listMonitoredFolders.Invalidate(); // 🔁 Force visual update
             };
 
-
             panelMonitoredContent.Controls.Clear();
             panelMonitoredContent.Controls.Add(listMonitoredFolders);
+            if (listMonitoredFolders != null)
+                listMonitoredFolders.Items.Clear();
+            if (listMonitoredFolders == null)
+                Debug.WriteLine("❌ listMonitoredFolders is null at this point!");
+
             panelMonitoredContent.Controls.Add(selectAllToggle); // add on top of list
 
 
@@ -427,14 +455,11 @@ namespace CreativeFileBrowser
         private void SaveCurrentWorkspace()
         {
             string name = PromptForWorkspaceName();
-            //test
-            MessageBox.Show("entered name: " + name);
-
             if (string.IsNullOrWhiteSpace(name)) return;
 
-            var existing = WorkspaceManager.SavedWorkspaces.FirstOrDefault(w =>
-                w.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
-
+            //var existing = WorkspaceManager.SavedWorkspaces.FirstOrDefault(w =>
+            //    w.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+            var existing = WorkspaceManager.GetWorkspaceByName(name);
             if (existing != null)
             {
                 var confirm = MessageBox.Show(
@@ -446,15 +471,8 @@ namespace CreativeFileBrowser
                 if (confirm != DialogResult.Yes)
                     return;
 
-                //debug test
-                MessageBox.Show(
-                "DEBUG:\n" +
-                $"Workspaces before save: {WorkspaceManager.SavedWorkspaces.Count}\n" +
-                $"Name to save: {name}\n" +
-                $"Folders: {string.Join(", ", monitoredPaths)}"
-                );
-
-                WorkspaceManager.SavedWorkspaces.Remove(existing);
+                // Remove existing workspace from the list
+                WorkspaceManager.RemoveWorkspaceByName(name);
             }
 
             var newWorkspace = new Workspace
@@ -463,12 +481,18 @@ namespace CreativeFileBrowser
                 MonitoredFolders = new(monitoredPaths),
                 SelectedSystemFolder = treeSystemFolders.SelectedNode?.Tag?.ToString()
             };
-            // 🔁 Refresh dropdown list
-            workspaceDropDown.Items.Clear();
-            foreach (var ws in WorkspaceManager.SavedWorkspaces.OrderBy(w => w.Name))
-                workspaceDropDown.Items.Add(ws.Name);
+            //add if new workspace to the list
             WorkspaceManager.SavedWorkspaces.Add(newWorkspace);
             WorkspaceManager.SaveWorkspacesToFile();
+            // 🔁 Refresh dropdown list
+            //workspaceDropDown.Items.Clear();
+            //foreach (var ws in WorkspaceManager.SavedWorkspaces.OrderBy(w => w.Name))
+            //    workspaceDropDown.Items.Add(ws.Name);
+            // ✅ Refresh dropdown and UI immediately
+            WorkspaceManager.LoadWorkspacesFromFile(); // Force update in memory
+            RefreshWorkspaceDropdown();
+            workspaceDropDown.SelectedItem = name;
+            LoadWorkspaceByName(name); // Immediately reflect updated paths
 
             //debug test
             string jsonDebug = File.Exists("workspaces.json")
@@ -669,6 +693,25 @@ namespace CreativeFileBrowser
         //**********************************************************************//
         //END WORKSPACE MENU - REFRESHER
         //**********************************************************************//
+
+        //**********************************************************************//
+        //FormClosing event handler
+        //**********************************************************************//
+
+        private void FormMain_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            appSettings.Width = this.Width;
+            appSettings.Height = this.Height;
+            appSettings.Top = this.Top;
+            appSettings.Left = this.Left;
+            appSettings.MonitoredFolders = monitoredPaths.ToList();
+
+            appSettings.VerticalSplit = verticalSplit?.SplitterDistance ?? 360;
+            appSettings.HorizontalTopSplit = horizontalTop?.SplitterDistance ?? 600;
+            appSettings.HorizontalBottomSplit = horizontalBottom?.SplitterDistance ?? 600;
+
+            SettingsManager.Save(appSettings);
+        }
 
         //**********************************************************************//
         //JSON basic screen

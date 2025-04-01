@@ -92,18 +92,28 @@
             };
             itemRemove.Click += (_, _) => RemoveCurrentWorkspace();
             btnFileMenu.DropDownItems.Clear();
-            btnFileMenu.DropDownItems.Add(itemSave);
-            btnFileMenu.DropDownItems.Add(itemRemove);
 
-            btnFileMenu.DropDownItems.Add(new ToolStripSeparator());
-
+            var itemClearAll = new ToolStripMenuItem("Clear All Monitored Folders")
+            {
+                DisplayStyle = ToolStripItemDisplayStyle.Text,
+                Padding = new Padding(1)
+            };
+            itemClearAll.Click += (_, _) =>
+            {
+                monitoredPaths.Clear();
+                listMonitoredFolders.Items.Clear();
+                listMonitoredFolders.Invalidate();
+            };
             var resetLayoutItem = new ToolStripMenuItem("Reset Quadrant View");
             resetLayoutItem.Click += (_, _) => ResetQuadrantsToMiddle();
 
+            //order the filemenu items cascade down
             btnFileMenu.DropDownItems.Add(itemSave);
             btnFileMenu.DropDownItems.Add(itemRemove);
+            btnFileMenu.DropDownItems.Add(new ToolStripSeparator());
+            btnFileMenu.DropDownItems.Add(itemClearAll);
+            btnFileMenu.DropDownItems.Add(new ToolStripSeparator());
             btnFileMenu.DropDownItems.Add(resetLayoutItem);
-
 
             // Filter items - file type and sort
             //container panel
