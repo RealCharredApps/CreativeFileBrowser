@@ -7,6 +7,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Drawing;
 using CreativeFileBrowser.Services;
+using System.Threading.Tasks;
 
 namespace CreativeFileBrowser
 {
@@ -190,6 +191,8 @@ namespace CreativeFileBrowser
 
             panelMonitoredContent.Controls.Clear();
             panelMonitoredContent.Controls.Add(listMonitoredFolders);
+            panelMonitoredContent.Controls.Add(panelGalleryContent);
+
             if (listMonitoredFolders != null)
                 listMonitoredFolders.Items.Clear();
             if (listMonitoredFolders == null)
@@ -238,9 +241,18 @@ namespace CreativeFileBrowser
                 WrapContents = true,
                 Padding = new Padding(10)
             };
-
             panelPreviewContent.Controls.Clear();
             panelPreviewContent.Controls.Add(panelFolderPreview);
+
+            panelGalleryContent = new FlowLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                AutoScroll = true,
+                WrapContents = true,
+                Padding = new Padding(10),
+                BackColor = Color.WhiteSmoke,
+                FlowDirection = FlowDirection.LeftToRight
+            };
 
             horizontalBottom.Panel1.Controls.Add(CreateQuadrant("Monitored Folders", out labelMonitoredTitle, out panelMonitoredContent));
             horizontalBottom.Panel2.Controls.Add(CreateQuadrant("Monitored Gallery", out labelGalleryTitle, out panelGalleryContent));
@@ -487,56 +499,66 @@ namespace CreativeFileBrowser
         //**********************************************************************//
         //LOAD MONITORED FOLDERS - GALLERY
         //**********************************************************************//
-        private void LoadMonitoredGallery()
+        private async void LoadMonitoredGallery()
         {
             panelGalleryContent.Controls.Clear();
 
-            foreach (var folder in monitoredPaths)
+            await Task.Run(() =>
             {
-                if (!Directory.Exists(folder)) continue;
-
-                foreach (var file in Directory.EnumerateFiles(folder, "*.*", SearchOption.AllDirectories)
-                         .Where(f => FolderPreviewService.allowedExtensions.Contains(Path.GetExtension(f).ToLowerInvariant())))
+                foreach (var folder in monitoredPaths)
                 {
-                    var thumb = FileThumbnailService.GenerateProportionalThumbnail(file, 160);
-                    if (thumb == null) continue;
+                    if (!Directory.Exists(folder)) continue;
 
-                    var imagePanel = new Panel
+                    foreach (var file in Directory.EnumerateFiles(folder, "*.*", SearchOption.AllDirectories)
+                             .Where(f => FolderPreviewService.allowedExtensions.Contains(Path.GetExtension(f).ToLowerInvariant())))
                     {
-                        Width = 160,
-                        Height = 180,
-                        Margin = new Padding(6)
-                    };
+                        if (!File.Exists(file)) continue;
 
-                    var pic = new PictureBox
-                    {
-                        Image = thumb,
-                        Width = 160,
-                        Height = 160,
-                        SizeMode = PictureBoxSizeMode.Zoom,
-                        Dock = DockStyle.Top,
-                        Cursor = Cursors.Hand,
-                        Tag = file
-                    };
+                        var thumb = FileThumbnailService.GenerateProportionalThumbnail(file, 160);
+                        if (thumb == null) continue;
 
-                    var label = new Label
-                    {
-                        Text = Path.GetFileName(file),
-                        Dock = DockStyle.Bottom,
-                        Font = new Font("Segoe UI", 8),
-                        TextAlign = ContentAlignment.MiddleCenter,
-                        Height = 20
-                    };
-
-                    pic.Click += (_, _) =>
-                        Process.Start("explorer.exe", $"/select,\"{file}\"");
-
-                    imagePanel.Controls.Add(pic);
-                    imagePanel.Controls.Add(label);
-
-                    panelGalleryContent.Controls.Add(imagePanel);
+                        Invoke(() =>
+                        {
+                            var imagePanel = CreateThumbnailPanel(file, thumb);
+                            panelGalleryContent.Controls.Add(imagePanel);
+                        });
+                    }
                 }
-            }
+            });
+        }
+
+        private Panel CreateThumbnailPanel(string file, Image thumb)
+        {
+            var pic = new PictureBox
+            {
+                Image = thumb,
+                Width = 160,
+                Height = 160,
+                SizeMode = PictureBoxSizeMode.Zoom,
+                Dock = DockStyle.Top,
+                Tag = file
+            };
+
+            var label = new Label
+            {
+                Text = Path.GetFileName(file),
+                Dock = DockStyle.Bottom,
+                Font = new Font("Segoe UI", 8),
+                TextAlign = ContentAlignment.MiddleCenter,
+                Height = 20
+            };
+
+            var panel = new Panel
+            {
+                Width = 160,
+                Height = 180,
+                Margin = new Padding(5)
+            };
+
+            panel.Controls.Add(pic);
+            panel.Controls.Add(label);
+
+            return panel;
         }
 
         //**********************************************************************//
