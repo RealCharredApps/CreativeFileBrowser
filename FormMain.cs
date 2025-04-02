@@ -31,6 +31,8 @@ namespace CreativeFileBrowser
         private List<Workspace> savedWorkspaces = new();
         private Workspace currentWorkspace = new();
         private FlowLayoutPanel panelFolderPreview;
+        private readonly MonitoredFolderWatcher _folderWatcher = new();
+
 
         public FormMain()
         {
@@ -486,8 +488,6 @@ namespace CreativeFileBrowser
             }
         }
 
-
-
         //**********************************************************************//
         //DUMMY METHOD - LOADIMAGESFOLDER
         //**********************************************************************//
@@ -540,7 +540,6 @@ namespace CreativeFileBrowser
             });
         }
 
-
         private Panel CreateThumbnailPanel(string file, Image thumb)
         {
             var pic = new PictureBox
@@ -575,6 +574,54 @@ namespace CreativeFileBrowser
             return panel;
         }
 
+        private void SetupMonitoredFolder(List<string> paths)
+        {
+            _folderWatcher.SetFolders(paths);
+            _folderWatcher.OnAnyFolderChanged += RefreshMonitoredGallery;
+            RefreshMonitoredGallery();
+        }
+
+        private void RefreshMonitoredGallery()
+        {
+            var allFiles = new List<string>();
+            foreach (var path in monitoredPaths)
+            {
+                if (Directory.Exists(path))
+                {
+                    var files = Directory.GetFiles(path, "*.*", SearchOption.AllDirectories)
+                                         .Where(f => FolderPreviewService.allowedExtensions.Contains(Path.GetExtension(f)))
+                                         .ToList();
+                    allFiles.AddRange(files);
+                }
+            }
+
+            DisplayMonitoredFiles(allFiles);
+        }
+        private void DisplayMonitoredFiles(List<string> files)
+        {
+            panelGalleryContent.Controls.Clear(); // panel for monitored quadrant
+
+            foreach (var file in files)
+            {
+                var thumb = FileThumbnailService.GenerateProportionalThumbnail(file, 160);
+                if (thumb == null) continue;
+
+                var imagePanel = CreateThumbnailPanel(file, thumb);
+                panelGalleryContent.Controls.Add(imagePanel);
+            }
+        }
+
+
+        private void InitWatcher()
+        {
+            _folderWatcher.OnAnyFolderChanged += RefreshMonitoredGallery;
+        }
+
+        private void UpdateMonitoredFolders(List<string> selectedPaths)
+        {
+            _folderWatcher.SetFolders(selectedPaths);
+            RefreshMonitoredGallery();
+        }
         //**********************************************************************//
         //WORKSPACE METHODS
         //**********************************************************************//
@@ -693,8 +740,6 @@ namespace CreativeFileBrowser
             }
         }
 
-
-
         private void RemoveCurrentWorkspace()
         {
             var selectedName = workspaceDropDown.SelectedItem?.ToString();
@@ -731,7 +776,6 @@ namespace CreativeFileBrowser
             monitoredPaths.Clear();
             listMonitoredFolders.Items.Clear();
         }
-
 
         //**********************************************************************//
         //WORKSPACES - add manager helpers
