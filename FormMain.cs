@@ -38,19 +38,6 @@ namespace CreativeFileBrowser
         {
             InitializeComponent();
 
-            horizontalTop.SplitterMoved += (_, _) =>
-            {
-                if (horizontalBottom.SplitterDistance != horizontalTop.SplitterDistance)
-                    horizontalBottom.SplitterDistance = horizontalTop.SplitterDistance;
-            };
-
-            horizontalBottom.SplitterMoved += (_, _) =>
-            {
-                if (horizontalTop.SplitterDistance != horizontalBottom.SplitterDistance)
-                    horizontalTop.SplitterDistance = horizontalBottom.SplitterDistance;
-            };
-
-
         }
 
         //**********************************************************************//
@@ -136,11 +123,13 @@ namespace CreativeFileBrowser
             {
                 if (listMonitoredFolders.SelectedItem is string path && Directory.Exists(path))
                 {
-                    SelectFolderInTree(path); // ✅ uses existing method
+                    panelFolderPreview.Controls.Clear();
+                    FolderPreviewService.LoadThumbnails(path, panelFolderPreview);
                 }
 
-                listMonitoredFolders.Invalidate(); // keeps visual feedback
+                listMonitoredFolders.Invalidate();
             };
+
 
             listMonitoredFolders.DrawMode = DrawMode.OwnerDrawFixed;
             listMonitoredFolders.SelectionMode = SelectionMode.MultiSimple;
@@ -201,7 +190,6 @@ namespace CreativeFileBrowser
 
             panelMonitoredContent.Controls.Clear();
             panelMonitoredContent.Controls.Add(listMonitoredFolders);
-            panelMonitoredContent.Controls.Add(panelGalleryContent);
 
             if (listMonitoredFolders != null)
                 listMonitoredFolders.Items.Clear();
@@ -210,10 +198,6 @@ namespace CreativeFileBrowser
 
             panelMonitoredContent.Controls.Add(selectAllToggle); // add on top of list
 
-            //monitored folder previews panel
-            if (monitoredPaths.Count > 0)
-                LoadMonitoredGallery();
-
             foreach (var path in monitoredPaths)
             {
                 var watcher = new FolderWatcherService(path, () => Invoke(LoadMonitoredGallery));
@@ -221,15 +205,18 @@ namespace CreativeFileBrowser
                 activeWatchers.Add(watcher);
             }
 
-
             //loads system drives
             LoadSystemDrives();
-            if (treeSystemFolders.Nodes.Count > 0)
+            Label emptyStateLabel = new()
             {
-                var firstDrive = treeSystemFolders.Nodes[0];
-                treeSystemFolders.SelectedNode = firstDrive;
-                FolderPreviewService.LoadThumbnails(firstDrive.Tag?.ToString(), panelFolderPreview);
-            }
+                Text = "📁 Click a folder to view its contents.",
+                Dock = DockStyle.Fill,
+                Font = new Font("Segoe UI", 10, FontStyle.Italic),
+                TextAlign = ContentAlignment.MiddleCenter,
+                ForeColor = Color.Gray
+            };
+            panelFolderPreview.Controls.Clear();
+            panelFolderPreview.Controls.Add(emptyStateLabel);
 
             LoadWorkspaces();
             LoadLastSession();
@@ -295,15 +282,8 @@ namespace CreativeFileBrowser
         {
             base.OnResize(e);
 
-            if (!this.IsHandleCreated || verticalSplit == null || horizontalTop == null || horizontalBottom == null)
-                return;
-
-            // Maintain vertical split ratio
-            verticalSplit.SplitterDistance = (int)(this.ClientSize.Height * verticalRatio);
-
-            horizontalTop.SplitterDistance = (int)(ClientSize.Width * horizontalRatioTop);
-            horizontalBottom.SplitterDistance = (int)(ClientSize.Width * horizontalRatioBottom);
         }
+
 
         private void ResetQuadrantsToMiddle()
         {
@@ -445,41 +425,78 @@ namespace CreativeFileBrowser
         {
             foreach (TreeNode driveNode in treeSystemFolders.Nodes)
             {
-                // Check drive root match
-                if (string.Equals(driveNode.Tag?.ToString(), path, StringComparison.OrdinalIgnoreCase))
-                {
-                    treeSystemFolders.SelectedNode = driveNode;
-                    FolderPreviewService.LoadThumbnails(path, panelFolderPreview);
-                    driveNode.Expand();
-                    return;
-                }
+                if (!path.StartsWith(driveNode.Tag?.ToString() ?? "", StringComparison.OrdinalIgnoreCase))
+                    continue;
 
-                // Check immediate children
-                foreach (TreeNode child in driveNode.Nodes)
-                {
-                    if (string.Equals(child.Tag?.ToString(), path, StringComparison.OrdinalIgnoreCase))
-                    {
-                        treeSystemFolders.SelectedNode = child;
-                        FolderPreviewService.LoadThumbnails(path, panelFolderPreview);
-                        driveNode.Expand();
-                        child.Expand();
-                        return;
-                    }
-                }
-
-                // Recursively search beyond child level
-                var match = FindNodeRecursive(driveNode, path);
-                if (match != null)
+                if (ExpandToPath(driveNode, path, out TreeNode? match) && match != null)
                 {
                     treeSystemFolders.SelectedNode = match;
+                    match.EnsureVisible();
                     FolderPreviewService.LoadThumbnails(path, panelFolderPreview);
-                    ExpandToNode(match);
-                    return;
                 }
+
+                return;
+            }
+
+            Debug.WriteLine($"❌ Folder not found in tree: {path}");
+        }
+
+        private void SelectFolderInTreeExact(string path)
+        {
+            foreach (TreeNode driveNode in treeSystemFolders.Nodes)
+            {
+                if (!path.StartsWith(driveNode.Tag?.ToString() ?? "", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                ExpandLazyNode(driveNode);
+
+                var found = FindNodeByPath(driveNode, path);
+                if (found != null)
+                {
+                    treeSystemFolders.SelectedNode = found;
+                    found.EnsureVisible();
+                    FolderPreviewService.LoadThumbnails(path, panelFolderPreview);
+                }
+                else
+                {
+                    Debug.WriteLine($"❌ Could not find node for: {path}");
+                }
+
+                return;
             }
         }
+
+        private void ExpandLazyNode(TreeNode node)
+        {
+            if (node.Nodes.Count == 1 && node.Nodes[0].Text == "...")
+            {
+                TreeSystemFolders_BeforeExpand(this, new TreeViewCancelEventArgs(node, false, TreeViewAction.Expand));
+                node.Expand();
+            }
+        }
+
+        private TreeNode? FindNodeByPath(TreeNode node, string path)
+        {
+            ExpandLazyNode(node);
+
+            foreach (TreeNode child in node.Nodes)
+            {
+                if (string.Equals(child.Tag?.ToString(), path, StringComparison.OrdinalIgnoreCase))
+                    return child;
+
+                var result = FindNodeByPath(child, path);
+                if (result != null)
+                    return result;
+            }
+
+            return null;
+        }
+
+
         private TreeNode? FindNodeRecursive(TreeNode node, string targetPath)
         {
+            ExpandNodeIfNeededAsync(node);
+
             foreach (TreeNode child in node.Nodes)
             {
                 if (string.Equals(child.Tag?.ToString(), targetPath, StringComparison.OrdinalIgnoreCase))
@@ -493,6 +510,49 @@ namespace CreativeFileBrowser
             return null;
         }
 
+        private async Task ExpandNodeIfNeededAsync(TreeNode node)
+        {
+            if (node.Nodes.Count == 1 && node.Nodes[0].Text == "...")
+            {
+                await InvokeAsync(() =>
+                {
+                    TreeSystemFolders_BeforeExpand(this, new TreeViewCancelEventArgs(node, false, TreeViewAction.Expand));
+                    node.Expand();
+                });
+            }
+        }
+        private Task InvokeAsync(Action action)
+        {
+            var tcs = new TaskCompletionSource();
+            BeginInvoke(() =>
+            {
+                try { action(); tcs.SetResult(); }
+                catch (Exception ex) { tcs.SetException(ex); }
+            });
+            return tcs.Task;
+        }
+
+
+
+        private async Task<TreeNode?> FindAndExpandPathAsync(TreeNode node, string path)
+        {
+            foreach (TreeNode child in node.Nodes)
+            {
+                await ExpandNodeIfNeededAsync(child);
+
+                if (string.Equals(child.Tag?.ToString(), path, StringComparison.OrdinalIgnoreCase))
+                    return child;
+
+                var result = await FindAndExpandPathAsync(child, path);
+                if (result != null)
+                    return result;
+            }
+
+            return null;
+        }
+
+
+
         private void ExpandToNode(TreeNode node)
         {
             TreeNode? current = node;
@@ -501,6 +561,35 @@ namespace CreativeFileBrowser
                 current.Expand();
                 current = current.Parent;
             }
+        }
+
+        private bool ExpandToPath(TreeNode parent, string targetPath, out TreeNode? match)
+        {
+            match = null;
+
+            if (parent.Nodes.Count == 1 && parent.Nodes[0].Text == "...")
+            {
+                TreeSystemFolders_BeforeExpand(this, new TreeViewCancelEventArgs(parent, false, TreeViewAction.Expand));
+                parent.Expand();
+            }
+
+            foreach (TreeNode child in parent.Nodes)
+            {
+                if (string.Equals(child.Tag?.ToString(), targetPath, StringComparison.OrdinalIgnoreCase))
+                {
+                    match = child;
+                    child.Expand();
+                    return true;
+                }
+
+                if (ExpandToPath(child, targetPath, out match) && match != null)
+                {
+                    child.Expand();
+                    return true;
+                }
+            }
+
+            return false;
         }
 
 
@@ -883,7 +972,9 @@ namespace CreativeFileBrowser
             // Select system folder if one was saved
             if (!string.IsNullOrWhiteSpace(match.SelectedSystemFolder))
             {
-                SelectFolderInTree(match.SelectedSystemFolder);
+                // DO NOT auto-expand or load folder preview
+                labelPreviewTitle.Text = "Folder Preview";
+
             }
             Debug.WriteLine($"✅ Workspace '{name}' loaded.");
             listMonitoredFolders.Invalidate(); // 🧼 Force redraw
