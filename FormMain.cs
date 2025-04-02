@@ -77,6 +77,8 @@ namespace CreativeFileBrowser
                 {
                     monitoredPaths.Add(path);
                     listMonitoredFolders.Items.Add(path);
+                    _folderWatcher.SetFolders(monitoredPaths);
+
                 }
             }
 
@@ -132,8 +134,14 @@ namespace CreativeFileBrowser
 
             listMonitoredFolders.SelectedIndexChanged += (_, _) =>
             {
-                listMonitoredFolders.Invalidate(); // trigger visual update
+                if (listMonitoredFolders.SelectedItem is string path && Directory.Exists(path))
+                {
+                    SelectFolderInTree(path); // ✅ uses existing method
+                }
+
+                listMonitoredFolders.Invalidate(); // keeps visual feedback
             };
+
             listMonitoredFolders.DrawMode = DrawMode.OwnerDrawFixed;
             listMonitoredFolders.SelectionMode = SelectionMode.MultiSimple;
 
@@ -203,6 +211,9 @@ namespace CreativeFileBrowser
             panelMonitoredContent.Controls.Add(selectAllToggle); // add on top of list
 
             //monitored folder previews panel
+            if (monitoredPaths.Count > 0)
+                LoadMonitoredGallery();
+
             foreach (var path in monitoredPaths)
             {
                 var watcher = new FolderWatcherService(path, () => Invoke(LoadMonitoredGallery));
@@ -228,13 +239,33 @@ namespace CreativeFileBrowser
         //**********************************************************************//
         private void AdjustLayout()
         {
-            horizontalTop.Panel1.Controls.Clear();
-            horizontalTop.Panel2.Controls.Clear();
-            horizontalBottom.Panel1.Controls.Clear();
-            horizontalBottom.Panel2.Controls.Clear();
+            // Clear old layout but keep existing menu/toolbars by targeting only quadrantHostPanel
+            quadrantHostPanel.Controls.Clear();
 
-            horizontalTop.Panel1.Controls.Add(CreateQuadrant("System Folders", out labelSystemTitle, out panelSystemContent));
-            horizontalTop.Panel2.Controls.Add(CreateQuadrant("Folder Preview", out labelPreviewTitle, out panelPreviewContent));
+            // Split main content: Left (folders), Right (preview)
+            var mainSplit = new SplitContainer
+            {
+                Dock = DockStyle.Fill,
+                Orientation = Orientation.Vertical,
+                SplitterDistance = quadrantHostPanel.Width / 2,
+                Name = "mainSplit"
+            };
+
+            // Split left side: Top = System, Bottom = Monitored
+            var leftSplit = new SplitContainer
+            {
+                Dock = DockStyle.Fill,
+                Orientation = Orientation.Horizontal,
+                SplitterDistance = quadrantHostPanel.Height / 2,
+                Name = "leftSplit"
+            };
+
+            // Quadrants
+            var systemPanel = CreateQuadrant("System Folders", out labelSystemTitle, out panelSystemContent);
+            var monitoredPanel = CreateQuadrant("Monitored Folders", out labelMonitoredTitle, out panelMonitoredContent);
+            var previewPanel = CreateQuadrant("Folder Preview", out labelPreviewTitle, out panelPreviewContent);
+
+            // Folder preview display area
             panelFolderPreview = new FlowLayoutPanel
             {
                 Dock = DockStyle.Fill,
@@ -246,19 +277,16 @@ namespace CreativeFileBrowser
             panelPreviewContent.Controls.Clear();
             panelPreviewContent.Controls.Add(panelFolderPreview);
 
-            panelGalleryContent = new FlowLayoutPanel
-            {
-                Dock = DockStyle.Fill,
-                AutoScroll = true,
-                WrapContents = true,
-                Padding = new Padding(10),
-                BackColor = Color.WhiteSmoke,
-                FlowDirection = FlowDirection.LeftToRight
-            };
+            // Build nested layout
+            leftSplit.Panel1.Controls.Add(systemPanel);
+            leftSplit.Panel2.Controls.Add(monitoredPanel);
+            mainSplit.Panel1.Controls.Add(leftSplit);
+            mainSplit.Panel2.Controls.Add(previewPanel);
 
-            horizontalBottom.Panel1.Controls.Add(CreateQuadrant("Monitored Folders", out labelMonitoredTitle, out panelMonitoredContent));
-            horizontalBottom.Panel2.Controls.Add(CreateQuadrant("Monitored Gallery", out labelGalleryTitle, out panelGalleryContent));
+            // Mount everything inside quadrantHostPanel to keep toolbar/menu intact
+            quadrantHostPanel.Controls.Add(mainSplit);
         }
+
 
         //**********************************************************************//
         //QUADRANT MOVER HELPER METHOD
@@ -279,17 +307,16 @@ namespace CreativeFileBrowser
 
         private void ResetQuadrantsToMiddle()
         {
+            // Look up the splits by name
+            var mainSplit = quadrantHostPanel.Controls.OfType<SplitContainer>().FirstOrDefault(s => s.Name == "mainSplit");
+            if (mainSplit != null)
+                mainSplit.SplitterDistance = quadrantHostPanel.Width / 2;
 
-            if (verticalSplit != null)
-                verticalSplit.SplitterDistance = this.ClientSize.Height / 2;
-
-            if (horizontalTop != null && horizontalBottom != null)
-            {
-                int halfWidth = this.ClientSize.Width / 2;
-                horizontalTop.SplitterDistance = halfWidth;
-                horizontalBottom.SplitterDistance = halfWidth;
-            }
+            var leftSplit = mainSplit?.Panel1.Controls.OfType<SplitContainer>().FirstOrDefault(s => s.Name == "leftSplit");
+            if (leftSplit != null)
+                leftSplit.SplitterDistance = quadrantHostPanel.Height / 2;
         }
+
         //QUADRANT NEST HELPER METHOD
         private Panel CreateQuadrant(string title, out Label titleLabel, out Panel contentPanel)
         {
@@ -418,7 +445,8 @@ namespace CreativeFileBrowser
         {
             foreach (TreeNode driveNode in treeSystemFolders.Nodes)
             {
-                if (driveNode.Tag?.ToString() == path)
+                // Check drive root match
+                if (string.Equals(driveNode.Tag?.ToString(), path, StringComparison.OrdinalIgnoreCase))
                 {
                     treeSystemFolders.SelectedNode = driveNode;
                     FolderPreviewService.LoadThumbnails(path, panelFolderPreview);
@@ -426,9 +454,10 @@ namespace CreativeFileBrowser
                     return;
                 }
 
+                // Check immediate children
                 foreach (TreeNode child in driveNode.Nodes)
                 {
-                    if (child.Tag?.ToString() == path)
+                    if (string.Equals(child.Tag?.ToString(), path, StringComparison.OrdinalIgnoreCase))
                     {
                         treeSystemFolders.SelectedNode = child;
                         FolderPreviewService.LoadThumbnails(path, panelFolderPreview);
@@ -437,8 +466,44 @@ namespace CreativeFileBrowser
                         return;
                     }
                 }
+
+                // Recursively search beyond child level
+                var match = FindNodeRecursive(driveNode, path);
+                if (match != null)
+                {
+                    treeSystemFolders.SelectedNode = match;
+                    FolderPreviewService.LoadThumbnails(path, panelFolderPreview);
+                    ExpandToNode(match);
+                    return;
+                }
             }
         }
+        private TreeNode? FindNodeRecursive(TreeNode node, string targetPath)
+        {
+            foreach (TreeNode child in node.Nodes)
+            {
+                if (string.Equals(child.Tag?.ToString(), targetPath, StringComparison.OrdinalIgnoreCase))
+                    return child;
+
+                var found = FindNodeRecursive(child, targetPath);
+                if (found != null)
+                    return found;
+            }
+
+            return null;
+        }
+
+        private void ExpandToNode(TreeNode node)
+        {
+            TreeNode? current = node;
+            while (current != null)
+            {
+                current.Expand();
+                current = current.Parent;
+            }
+        }
+
+
 
         //**********************************************************************//
         //ADD MONITORED FOLDERS
@@ -499,46 +564,18 @@ namespace CreativeFileBrowser
         //**********************************************************************//
         //LOAD MONITORED FOLDERS - GALLERY
         //**********************************************************************//
-        private async void LoadMonitoredGallery()
+        private void LoadMonitoredGallery()
         {
             if (panelGalleryContent == null) return;
             panelGalleryContent.Controls.Clear();
 
-            var foldersSnapshot = monitoredPaths.ToList();
-
-            await Task.Run(() =>
+            foreach (var path in monitoredPaths)
             {
-                foreach (var folder in foldersSnapshot)
-                {
-                    if (!Directory.Exists(folder)) continue;
-
-                    foreach (var file in Directory.EnumerateFiles(folder, "*.*", SearchOption.AllDirectories)
-                             .Where(f => FolderPreviewService.allowedExtensions.Contains(Path.GetExtension(f).ToLowerInvariant())))
-                    {
-                        if (!File.Exists(file)) continue;
-
-                        try
-                        {
-                            var thumb = FileThumbnailService.GenerateProportionalThumbnail(file, 160);
-                            if (thumb == null) continue;
-
-                            Invoke(() =>
-                            {
-                                var imagePanel = CreateThumbnailPanel(file, thumb);
-                                panelGalleryContent.Controls.Add(imagePanel);
-                                MonitoredGalleryService.LoadThumbnailsParallel(monitoredPaths, panelGalleryContent);
-                            });
-                        }
-                        catch (OutOfMemoryException)
-                        {
-                            GC.Collect();
-                            continue;
-                        }
-                        catch { continue; }
-                    }
-                }
-            });
+                if (!Directory.Exists(path)) continue;
+                FolderPreviewService.LoadThumbnails(path, (FlowLayoutPanel)panelGalleryContent);
+            }
         }
+
 
         private Panel CreateThumbnailPanel(string file, Image thumb)
         {
@@ -818,6 +855,7 @@ namespace CreativeFileBrowser
             if (match == null) return;
 
             currentWorkspace = match;
+            _folderWatcher.SetFolders(monitoredPaths);
 
             // Clear current monitored state
             monitoredPaths.Clear();
@@ -849,6 +887,8 @@ namespace CreativeFileBrowser
             }
             Debug.WriteLine($"✅ Workspace '{name}' loaded.");
             listMonitoredFolders.Invalidate(); // 🧼 Force redraw
+            if (monitoredPaths.Count > 0)
+                LoadMonitoredGallery();
 
         }
         //**********************************************************************//

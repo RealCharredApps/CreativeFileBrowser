@@ -1,16 +1,5 @@
 [
   {
-    "Name": "another",
-    "MonitoredFolders": [
-      "D:\\3 11 25 TP Idea 1 - Roleplays 1 - CPC",
-      "D:\\3 12 25 TP idea 4 - Control 1 - MCPFCP",
-      "D:\\2 28 25 TP gfx appleee ad refresh idea 5 storyboard pngs",
-      "C:\\Users\\Justin.Sjaaheim\\OneDrive - Bit-Wizards Information Technology Solutions, Inc\\Documents - Marketing",
-      "D:\\3 4 25 BW applee commercial"
-    ],
-    "SelectedSystemFolder": "D:\\3 4 25 BW applee commercial"
-  },
-  {
     "Name": "test1",
     "MonitoredFolders": [
       "D:\\3 11 25 TP Idea 1 - Roleplays 1 - CPC",
@@ -50,5 +39,13 @@
       "C:\\Users\\Justin.Sjaaheim\\Pictures"
     ],
     "SelectedSystemFolder": "C:\\Users\\Justin.Sjaaheim\\Pictures"
+  },
+  {
+    "Name": "SP Cloud Vis - TOP",
+    "MonitoredFolders": [
+      "C:\\Users\\Justin.Sjaaheim\\OneDrive - Bit-Wizards Information Technology Solutions, Inc\\Documents - Marketing\\Clients\\Bit-Wizards",
+      "C:\\Users\\Justin.Sjaaheim\\OneDrive - Bit-Wizards Information Technology Solutions, Inc\\Documents - Marketing\\Clients\\TalkingParents"
+    ],
+    "SelectedSystemFolder": "C:\\Users\\Justin.Sjaaheim\\OneDrive - Bit-Wizards Information Technology Solutions, Inc\\Documents - Marketing\\Clients\\TalkingParents"
   }
 ]
