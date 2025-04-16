@@ -2,6 +2,8 @@
 CreativeFileBrowser is a lightweight, visual-first file browser tailored for creatives, editors, and visual designers. It makes navigating and previewing images, videos, and other creative assets fast and seamless — without needing to dig through complex folders or worry about file types.
 
 ![Screenshot 2025-04-11 130718](https://github.com/user-attachments/assets/e9e29610-5e21-4096-a326-222cb3e80d61)
+![Image](https://github.com/user-attachments/assets/9d763272-c098-42d5-b324-8252bc15e7c9)
+
 
 🚀 Features
 🧭 System Folder Treeview
