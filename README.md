@@ -2,7 +2,7 @@ Cross-Platform version of app — Coming Soon.
 
 **Preview of Avalonia UI in Progress**
 (updated 4/20/25)
-![Uploading Screenshot 2025-04-20 at 8.13.55 AM.png…]()
+![Screenshot 2025-04-20 at 8 13 55 AM](https://github.com/user-attachments/assets/87c0e0fb-de3f-4b69-956a-14b16be2fd20)
 
 
 Following MVVM Architectural Model
