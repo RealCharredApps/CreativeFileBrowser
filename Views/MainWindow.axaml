@@ -39,32 +39,35 @@
                 <!-- 1.d. Next Left — Feature Action Stuff -->
                 <Rectangle Fill="#0A0A17" Grid.Row="3" ></Rectangle>
                 <StackPanel Grid.Row="3" Margin="5" HorizontalAlignment="Center" VerticalAlignment="Top">
-                    <Border Background="#1F1F37" CornerRadius="6" Padding="9, 1.5">
-                        <Label Foreground="#F6F6F6">Features</Label>
+                    <Border Background="#1F1F37" CornerRadius="6" Padding="9, 1.5" Margin="0, 0, 0, 5" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Label Foreground="#F6F6F6" FontSize="10">De/Select All</Label>
                     </Border>
-                    <Border Background="#1F1F37" CornerRadius="6" Padding="9, 1.5" Margin="0, 5, 0, 0">
-                        <Label Foreground="#F6F6F6">Features</Label>
+                    <Border Background="#1F1F37" CornerRadius="6" Margin="0, 0, 0, 5" Padding="9, 1.5" HorizontalAlignment="Center" VerticalAlignment="Top">
+                        <Label Foreground="#F6F6F6" FontSize="10">+ Monitor Folder</Label>
+                    </Border>
+                    <Border Background="#1F1F37" CornerRadius="6" Margin="0, 0, 0, 5" Padding="9, 1.5" HorizontalAlignment="Center" VerticalAlignment="Top">
+                        <Label Foreground="#F6F6F6" FontSize="10">- Monitor Folder</Label>
                     </Border>
                 </StackPanel>
                 <!-- 1.e. Next Left — Workspace Options -->
                 <Rectangle Grid.Row="4" ></Rectangle>
-                <Border Background="#7A7A94" Grid.Row="4" CornerRadius="6" Margin="5, 5, 5, 0" Padding="9, 1.5" HorizontalAlignment="Center" VerticalAlignment="Top">
-                    <Label Foreground="#070714">Workspace ^</Label>
+                <Border Background="#7A7A94" Grid.Row="4" CornerRadius="6" Margin="0, 0, 0, 5" Padding="9, 1.5" HorizontalAlignment="Center" VerticalAlignment="Top">
+                    <Label Foreground="#070714">Workspaces ^</Label>
                 </Border>
                 <!-- 1.f. Next Left — Workspace List -->
                 <Rectangle Grid.Row="5" ></Rectangle>
                 <StackPanel Grid.Row="5" Margin="5" HorizontalAlignment="Center" VerticalAlignment="Top">
-                    <Border Background="#1F1F37" CornerRadius="6" Padding="9, 1.5">
-                        <Label Foreground="#F6F6F6">Features</Label>
+                    <Border Background="#1F1F37" CornerRadius="6" Margin="0, 0, 0, 5" Padding="9, 1.5" HorizontalAlignment="Center" VerticalAlignment="Top">
+                        <Label Foreground="#F6F6F6" FontSize="10">+ Workspace</Label>
                     </Border>
-                    <Border Background="#1F1F37" CornerRadius="6" Padding="9, 1.5" Margin="0, 5, 0, 0">
-                        <Label Foreground="#F6F6F6">Features</Label>
+                    <Border Background="#1F1F37" CornerRadius="6" Margin="0, 0, 0, 5" Padding="9, 1.5" HorizontalAlignment="Center" VerticalAlignment="Top">
+                        <Label Foreground="#F6F6F6" FontSize="10">- Workspace</Label>
                     </Border>
                 </StackPanel>
                 <!-- 1.g. Bottom Left — User Options // Settings -->
                 <Rectangle Grid.Row="7" ></Rectangle>
                 <StackPanel Grid.Row="7" Margin="5" HorizontalAlignment="Center" VerticalAlignment="Bottom">
-                    <Border Background="#7A7A94" CornerRadius="25" Padding="9, 1.5">
+                    <Border Background="#7A7A94" CornerRadius="25" Padding="9, 1.5" HorizontalAlignment="Center" VerticalAlignment="Top">
                         <Label Foreground="#F6F6F6">S</Label>
                     </Border>
                 </StackPanel>
