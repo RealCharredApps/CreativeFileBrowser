@@ -28,9 +28,9 @@
     <!-- Grid Content - Top Down -->
     <!-- Title Bar -->
     <TextBlock Grid.Row="0" Grid.ColumnSpan="5"
-           HorizontalAlignment="Center" VerticalAlignment="Center"
-           FontSize="24" Foreground="#FFFFFF" Margin="10,0,10,0"
-           Padding="10">
+           HorizontalAlignment="Left" VerticalAlignment="Center"
+           FontSize="12" Foreground="#FFFFFF" Margin="10,0,10,0"
+           Padding="5"> logo +
         Creative File Browser
     </TextBlock>
     <!-- Top Divider -->
@@ -41,70 +41,59 @@
     <!-- Left Options Area -->
     <Grid Grid.Column="0" Grid.Row="2" RowDefinitions="Auto, Auto, Auto, Auto, Auto, *, Auto">
         <!-- Left Top Buttons -->
-        <StackPanel Grid.Row="0" Margin="5" HorizontalAlignment="Right" VerticalAlignment="Center" Orientation="Horizontal">
-            <Border Height="30" Background="#2E2E47" CornerRadius="6" Padding="5" Margin="2.5,0,2.5,0" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <Label Foreground="#F6F6F6">A</Label>
+        <StackPanel Grid.Row="0" Margin="5" HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Vertical">
+            <Border Height="30" Background="#2E2E47" CornerRadius="6" Padding="5" Margin="5, 2.5" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Label FontSize="12" Foreground="#F6F6F6">A</Label>
             </Border>
-            <Border Height="30" Background="#2E2E47" CornerRadius="6" Padding="5" Margin="2.5,0,2.5,0" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <Label Foreground="#F6F6F6">B</Label>
+            <TextBlock FontSize="10" Foreground="Gray" HorizontalAlignment="Center">System Files</TextBlock>
+            
+            <Border Height="30" Background="#2E2E47" CornerRadius="6" Padding="5"  Margin="5, 2.5" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Label FontSize="12" Foreground="#F6F6F6">B</Label>
             </Border>
-            <Border Height="30" Background="#2E2E47" CornerRadius="6" Padding="5" Margin="2.5,0,2.5,0" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <Label Foreground="#F6F6F6">C</Label>
+            <TextBlock FontSize="10" Foreground="Gray" HorizontalAlignment="Center">Monitored Files</TextBlock>
+            
+            <Border Height="30" Background="#2E2E47" CornerRadius="6" Padding="5"  Margin="5, 2.5" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Label FontSize="12" Foreground="#F6F6F6">C</Label>
             </Border>
-            <Border Height="30" Background="#2E2E47" CornerRadius="6" Padding="5" Margin="2.5,0,2.5,0" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <Label Foreground="#F6F6F6">D</Label>
+            <TextBlock FontSize="10" Foreground="Gray" HorizontalAlignment="Center">Workspaces</TextBlock>
+
+            <Border Height="30" Background="#2E2E47" CornerRadius="6" Padding="5"  Margin="5, 2.5" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Label FontSize="12" Foreground="#F6F6F6">D</Label>
             </Border>
+            <TextBlock FontSize="10" Foreground="Gray" HorizontalAlignment="Center">Smart Folders</TextBlock>
+
+            <Border Height="30" Background="#2E2E47" CornerRadius="6" Padding="5" Margin="5, 2.5" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Label FontSize="12" Foreground="#F6F6F6">E</Label>
+            </Border>
+            <TextBlock FontSize="10" Foreground="Gray" HorizontalAlignment="Center">Project Notes</TextBlock>
+
+            <Border Height="30" Background="#2E2E47" CornerRadius="6" Padding="5"  Margin="5, 2.5" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Label FontSize="12" Foreground="#F6F6F6">F</Label>
+            </Border>
+            <TextBlock FontSize="10" Foreground="Gray" HorizontalAlignment="Center">Inspiration</TextBlock>
+
         </StackPanel>
-        <!-- Left — View Options -->
-        <Border Background="#7A7A94" Grid.Row="1" CornerRadius="6" Margin="5" Padding="9,1.5" HorizontalAlignment="Center" VerticalAlignment="Top">
-            <Label Foreground="#070714">Choose View ^</Label>
-        </Border>
-        <!-- Left — Feature Action Stuff -->
-        <StackPanel Grid.Row="3" Margin="5" HorizontalAlignment="Center" VerticalAlignment="Top">
-            <Border Background="#1F1F37" CornerRadius="6" Padding="9,1.5" Margin="0,0,0,5" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <Label Foreground="#F6F6F6" FontSize="10">De/Select All</Label>
+
+        <StackPanel Grid.Row="7" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="5">
+            <Border Height="30" Background="#2E2E47" CornerRadius="50" Padding="5"  Margin="5, 2.5" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Label FontSize="12" Foreground="#F6F6F6">H</Label>
             </Border>
-            <Border Background="#1F1F37" CornerRadius="6" Margin="0,0,0,5" Padding="9,1.5" HorizontalAlignment="Center" VerticalAlignment="Top">
-                <Label Foreground="#F6F6F6" FontSize="10">+ Monitor Folder</Label>
-            </Border>
-            <Border Background="#1F1F37" CornerRadius="6" Margin="0,0,0,5" Padding="9,1.5" HorizontalAlignment="Center" VerticalAlignment="Top">
-                <Label Foreground="#F6F6F6" FontSize="10">- Monitor Folder</Label>
-            </Border>
+            <TextBlock FontSize="10" Foreground="Gray">Settings</TextBlock>
         </StackPanel>
-        <!-- 1.e. Next Left — Workspace Options -->
-        <Rectangle Grid.Row="4"></Rectangle>
-        <Border Background="#7A7A94" Grid.Row="4" CornerRadius="6" Margin="0,0,0,5" Padding="9,1.5" HorizontalAlignment="Center" VerticalAlignment="Top">
-            <Label Foreground="#070714">Workspaces ^</Label>
-        </Border>
-        <Rectangle Grid.Row="5" ></Rectangle>
-            <StackPanel Grid.Row="5" Margin="5" HorizontalAlignment="Center" VerticalAlignment="Top">
-                <Border Background="#1F1F37" CornerRadius="6" Margin="0, 0, 0, 5" Padding="9, 1.5" HorizontalAlignment="Center" VerticalAlignment="Top">
-                    <Label Foreground="#F6F6F6" FontSize="10">+ Workspace</Label>
-                </Border>
-                <Border Background="#1F1F37" CornerRadius="6" Margin="0, 0, 0, 5" Padding="9, 1.5" HorizontalAlignment="Center" VerticalAlignment="Top">
-                    <Label Foreground="#F6F6F6" FontSize="10">- Workspace</Label>
-                </Border>
-            </StackPanel>
-            <!-- 1.g. Bottom Left — User Options // Settings -->
-            <Rectangle Grid.Row="7" ></Rectangle>
-            <StackPanel Grid.Row="7" Margin="5" HorizontalAlignment="Center" VerticalAlignment="Bottom">
-                <Border Background="#7A7A94" CornerRadius="25" Padding="9, 1.5" HorizontalAlignment="Center" VerticalAlignment="Top">
-                    <Label Foreground="#F6F6F6">S</Label>
-                </Border>
-            </StackPanel>
-        </Grid>
+    </Grid>
+    
     <!-- Left Column Divider -->
     <Rectangle Fill="#25253E" Grid.Column="1" Grid.Row="2" Width="2"></Rectangle>
     
     <!-- Center - File Treeview options -->
-    <Grid Grid.Column="3" Grid.Row="2" RowDefinitions="Auto, Auto, Auto, Auto, *">
-        <TextBlock Grid.Row="0" Foreground="White">File Path</TextBlock>
+    <Grid Grid.Column="3" Grid.Row="2" RowDefinitions="Auto, Auto, Auto, Auto, *" >
+        <TextBlock Grid.Row="0" Foreground="White" Padding="5">File Path</TextBlock>
         <!-- Divider -->
         <Rectangle Grid.Row="1" Fill="#1A1A2E" Height="2"/>
-        <TextBlock Grid.Row="2" Foreground="White">File Search</TextBlock>
+        <TextBlock Grid.Row="2" Foreground="White" Padding="5">File Search</TextBlock>
         <!-- Divider -->
         <Rectangle Grid.Row="3" Fill="#1A1A2E" Height="2"/>
-        <TextBlock Grid.Row="4" Foreground="White">File Treeview</TextBlock>
+        <TextBlock Grid.Row="4" Foreground="White" Padding="5">File Treeview</TextBlock>
     </Grid>
     <!-- Center Column Divider -->
     <Rectangle Fill="#25253E" Grid.Column="4" Grid.Row="2" Width="2"></Rectangle>
