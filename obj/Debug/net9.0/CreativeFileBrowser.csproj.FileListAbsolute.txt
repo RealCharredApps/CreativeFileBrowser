@@ -59,10 +59,10 @@
 /Library/CodeProjects/CreativeFileBrowser_Scratch_Avalonia/CreativeFileBrowser/obj/Debug/net9.0/CreativeFileBrowser.AssemblyInfoInputs.cache
 /Library/CodeProjects/CreativeFileBrowser_Scratch_Avalonia/CreativeFileBrowser/obj/Debug/net9.0/CreativeFileBrowser.AssemblyInfo.cs
 /Library/CodeProjects/CreativeFileBrowser_Scratch_Avalonia/CreativeFileBrowser/obj/Debug/net9.0/CreativeFileBrowser.csproj.CoreCompileInputs.cache
+/Library/CodeProjects/CreativeFileBrowser_Scratch_Avalonia/CreativeFileBrowser/obj/Debug/net9.0/CreativeFileBrowser.sourcelink.json
 /Library/CodeProjects/CreativeFileBrowser_Scratch_Avalonia/CreativeFileBrowser/obj/Debug/net9.0/Avalonia/CreativeFileBrowser.dll
 /Library/CodeProjects/CreativeFileBrowser_Scratch_Avalonia/CreativeFileBrowser/obj/Debug/net9.0/Avalonia/CreativeFileBrowser.pdb
 /Library/CodeProjects/CreativeFileBrowser_Scratch_Avalonia/CreativeFileBrowser/obj/Debug/net9.0/refint/Avalonia/CreativeFileBrowser.dll
 /Library/CodeProjects/CreativeFileBrowser_Scratch_Avalonia/CreativeFileBrowser/obj/Debug/net9.0/Creative.4895ED83.Up2Date
 /Library/CodeProjects/CreativeFileBrowser_Scratch_Avalonia/CreativeFileBrowser/obj/Debug/net9.0/CreativeFileBrowser.genruntimeconfig.cache
 /Library/CodeProjects/CreativeFileBrowser_Scratch_Avalonia/CreativeFileBrowser/obj/Debug/net9.0/ref/CreativeFileBrowser.dll
-/Library/CodeProjects/CreativeFileBrowser_Scratch_Avalonia/CreativeFileBrowser/obj/Debug/net9.0/CreativeFileBrowser.sourcelink.json

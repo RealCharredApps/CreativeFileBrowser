@@ -6,9 +6,13 @@
         mc:Ignorable="d" d:DesignWidth="620" d:DesignHeight="400"
         Width="620" Height="400"
         x:Class="CreativeFileBrowser.Views.MainWindow"
-        x:DataType="vm:MainWindowViewModel"
+        x:DataType="vm:MainViewModel"
         Icon="/Assets/avalonia-logo.ico"
         Title="CreativeFileBrowser">
+
+        <Design.DataContext>
+            <vm:MainViewModel/>
+        </Design.DataContext>
 
     <!-- Grid Setup -->
     <Grid Background="#101022">
@@ -28,11 +32,11 @@
     <!-- Grid Content - Top Down -->
     <!-- Title Bar -->
     <Rectangle Grid.ColumnSpan="5" Grid.Row="0" Fill="#131718"></Rectangle>
-    <TextBlock Grid.Row="0" Grid.ColumnSpan="5"
-           HorizontalAlignment="Left" VerticalAlignment="Center"
-           FontSize="12" Foreground="#FFFFFF" Margin="10,0,10,0"
-           Padding="5"> logo +
-        Creative File Browser
+    <TextBlock Text="{Binding Title}"
+        Grid.Row="0" Grid.ColumnSpan="5"
+        HorizontalAlignment="Left" VerticalAlignment="Center"
+        FontSize="12" Foreground="#FFFFFF" Margin="10,0,10,0"
+        Padding="5">
     </TextBlock>
     <!-- Top Divider -->
     <Rectangle Grid.Row="1" Grid.ColumnSpan="5"
@@ -123,8 +127,9 @@
     <Rectangle Fill="#292D2E" Grid.Column="3" Grid.Row="2" Width="2"></Rectangle>
     
     <!-- Right Main View — The Magic Gallery -->
-    <!-- Needs 3 columns - title, line, gallery -->
+    <!-- Needs 3 Rows - title, line, gallery -->
     <Rectangle Grid.Column="4" Grid.Row="3" Fill="#1F1F1F"></Rectangle>
+    <TextBlock Grid.Column="4" Grid.Row="3" Foreground="Snow" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5">Gallery View</TextBlock>
     <!-- Top Divider
     <Rectangle Grid.Row="1" Grid.ColumnSpan="5"
                Fill="#0C0C0D" Height="2"/>
