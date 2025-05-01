@@ -9,7 +9,10 @@ public partial class MainViewModel : ObservableObject
 {
     // Title Top Area
     [ObservableProperty]
-    private string _title = "CFB";
+    private string _title = "FH";
+    // SubTitle Top Area
+    [ObservableProperty]
+    private string _subtitle = "Creative File Browser";
 
     // Current view state - determines which UI elements are visible
     [ObservableProperty]
