@@ -24,7 +24,8 @@ public partial class MainViewModel : ObservableObject
     // Text bindings for the workspace bar
     [ObservableProperty]
     private string currentWorkspaceTxt = string.Empty;
-
+    [ObservableProperty]
+    private string addToCurrentWorkspaceTxt = string.Empty;
     [ObservableProperty]
     private string saveCurrentWorkspaceTxt = string.Empty;
 
@@ -42,13 +43,14 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private string _workspacesTxt = "Workspaces";
 
-    //Start Future Features
-    [ObservableProperty]
-    private string _smartFoldersTxt = "Smart Folders";
-    [ObservableProperty]
-    private string _userNotesTxt = "Notes";
-    [ObservableProperty]
-    private string _inspoTagsTxt = "Inspo Tags";
+    /*Start Future Features
+        [ObservableProperty]
+        private string _smartFoldersTxt = "Smart Folders";
+        [ObservableProperty]
+        private string _userNotesTxt = "Notes";
+        [ObservableProperty]
+        private string _inspoTagsTxt = "Inspo Tags";
+    */
     //End Future Features
 
     [ObservableProperty]
@@ -91,27 +93,42 @@ public partial class MainViewModel : ObservableObject
         switch (viewType)
         {
             case ViewType.SystemFiles:
-                CurrentWorkspaceTxt = "System Files";
-                SaveCurrentWorkspaceTxt = "Add to Monitored";
-                //UpdateCurrentWorkspaceTxt = "Override";
-                RemoveCurrentWorkspaceTxt = "Remove";
+                CurrentWorkspaceTxt = "System Files:";
+                AddToCurrentWorkspaceTxt = "Monitor Folder";
+                SaveCurrentWorkspaceTxt = string.Empty;
+                UpdateCurrentWorkspaceTxt = string.Empty;
+                RemoveCurrentWorkspaceTxt = string.Empty;
+                CurrentFilePath = "CurrentFilePath";
                 break;
 
             case ViewType.MonitoredFolders:
-                CurrentWorkspaceTxt = "Monitored Folders";
-                SaveCurrentWorkspaceTxt = "Save Workspace";
-                UpdateCurrentWorkspaceTxt = "Update";
-                RemoveCurrentWorkspaceTxt = "Remove";
+                CurrentWorkspaceTxt = "Monitored Folders:";
+                AddToCurrentWorkspaceTxt = string.Empty;
+                SaveCurrentWorkspaceTxt = "Save New";
+                UpdateCurrentWorkspaceTxt = "Update Current";
+                RemoveCurrentWorkspaceTxt = "Remove Folder";
+                CurrentFilePath = "CurrentFilePath";
+                break;
+
+            case ViewType.WorkspaceFolders:
+                CurrentWorkspaceTxt = "Workspace Folders:";
+                AddToCurrentWorkspaceTxt = string.Empty;
+                SaveCurrentWorkspaceTxt = "Save New";
+                UpdateCurrentWorkspaceTxt = "Update Current";
+                RemoveCurrentWorkspaceTxt = "Remove Workspace";
+                CurrentFilePath = "CurrentFilePath";
                 break;
         }
         // Notify that multiple properties changed
         OnPropertyChanged(nameof(IsSystemFilesView));
         OnPropertyChanged(nameof(IsMonitoredFoldersView));
+        OnPropertyChanged(nameof(IsWorkspaceFoldersView));
     }
 
     // View helpers for visibility bindings
     public bool IsSystemFilesView => CurrentView == ViewType.SystemFiles;
     public bool IsMonitoredFoldersView => CurrentView == ViewType.MonitoredFolders;
+    public bool IsWorkspaceFoldersView => CurrentView == ViewType.WorkspaceFolders;
 
     // Command handlers for icon button clicks
     [RelayCommand]
@@ -119,20 +136,28 @@ public partial class MainViewModel : ObservableObject
     {
         UpdateViewState(ViewType.SystemFiles);
     }
-
-    [RelayCommand]
-    private void ShowWorkspaces()
-    {
-        // Handle workspaces button click
-        // Perhaps show workspace selection or management UI
-    }
     [RelayCommand]
     private void ShowMonitoredFiles()
     {
         UpdateViewState(ViewType.MonitoredFolders);
     }
+    [RelayCommand]
+    private void ShowWorkspaceFolders()
+    {
+        UpdateViewState(ViewType.WorkspaceFolders);
+    }
 
     // Additional commands for the workspace actions
+    [RelayCommand]
+    private async Task AddToWorkspace()
+    {
+        // Show user override popup for both views
+        var result = await ShowConfirmDialog("Folder Added to Monitored in Current Workspace");
+        if (result)
+        {
+            // Perform update based on current view
+        }
+    }
     [RelayCommand]
     private async Task SaveWorkspace()
     {
@@ -183,7 +208,6 @@ public partial class MainViewModel : ObservableObject
         // For Avalonia, you would use DialogService or a similar approach
         return Task.FromResult(false); // Placeholder
     }
-
     private Task<string> ShowNameInputDialog(string prompt)
     {
         // Implementation depends on your UI framework
@@ -205,7 +229,8 @@ public partial class MainViewModel : ObservableObject
 public enum ViewType
 {
     SystemFiles,
-    MonitoredFolders
+    MonitoredFolders,
+    WorkspaceFolders
 }
 
 // Model for workspace items
