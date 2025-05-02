@@ -1,6 +1,8 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
+﻿using System;
 using System.Collections.ObjectModel;
+using System.IO;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using System.Threading.Tasks;
 
 namespace CreativeFileBrowser.ViewModels;
@@ -13,6 +15,9 @@ public partial class MainViewModel : ObservableObject
     // SubTitle Top Area
     [ObservableProperty]
     private string _subtitle = "Creative File Browser";
+
+    [ObservableProperty]
+    private ObservableCollection<DriveInfo> _drives;
 
     // Current view state - determines which UI elements are visible
     [ObservableProperty]
@@ -55,7 +60,7 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty]
     private string _userSettingsTxt = "Settings";
-    
+
     // Settings View popup//
     [RelayCommand]
     private void ShowSettings()
@@ -83,6 +88,11 @@ public partial class MainViewModel : ObservableObject
     public MainViewModel()
     {
         UpdateViewState(ViewType.SystemFiles);
+        // Initialize the collection
+        Drives = new ObservableCollection<DriveInfo>();
+
+        // Load drives when created
+        LoadDrives();
     }
 
     // Updates UI based on selected view
@@ -146,6 +156,32 @@ public partial class MainViewModel : ObservableObject
     {
         UpdateViewState(ViewType.WorkspaceFolders);
     }
+
+
+    /// <summary>
+    /// Loads all available drives on the system
+    /// </summary>
+    private void LoadDrives()
+    {
+        Drives.Clear();
+
+        // Get all drives and add to the collection
+        foreach (var drive in DriveInfo.GetDrives())
+        {
+            Drives.Add(drive);
+        }
+    }
+
+    /// <summary>
+    /// Command to refresh the drive list
+    /// </summary>
+    [RelayCommand]
+    private void RefreshDrives()
+    {
+        LoadDrives();
+    }
+
+
 
     // Additional commands for the workspace actions
     [RelayCommand]
