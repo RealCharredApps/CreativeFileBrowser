@@ -58,7 +58,7 @@
             <!-- Left Buttons -->
             <StackPanel Grid.Row="1" Margin="12, 4" 
                         HorizontalAlignment="Center" VerticalAlignment="Top" 
-                        Orientation="Vertical">            
+                        Orientation="Vertical">
                 <!-- Left Top - System Files + Current Workspace -->
                 <TextBlock Text="System Files" Margin="0, 0, 0, 8"
                             FontSize="12" Foreground="White" 
