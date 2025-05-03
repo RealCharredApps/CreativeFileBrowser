@@ -2,7 +2,7 @@ Cross-Platform version of app — Coming Soon.
 
 **Preview of Avalonia UI in Progress**
 (updated 5/3/25)
-<img width="576" alt="Screenshot 2025-05-03 at 7 58 15 AM" src="https://github.com/user-attachments/assets/923cf957-ed96-4de9-aaf4-030d0a4f5a86" />
+<img width="576" alt="Screenshot 2025-05-03 at 5 53 13 PM" src="https://github.com/user-attachments/assets/5c7b0e21-a9c1-490f-9f00-fb0017886214" />
 
 
 **Progress Doc**
