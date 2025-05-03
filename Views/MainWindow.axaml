@@ -3,12 +3,12 @@
         xmlns:vm="using:CreativeFileBrowser.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="620" d:DesignHeight="400"
-        Width="620" Height="400"
+        mc:Ignorable="d" d:DesignWidth="570" d:DesignHeight="400"
+        Width="570" Height="400"
         x:Class="CreativeFileBrowser.Views.MainWindow"
         x:DataType="vm:MainViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="CreativeFileBrowser">
+        Title="FileHoundCreativeFileBrowser">
 
         <Design.DataContext>
             <vm:MainViewModel/>
@@ -18,85 +18,37 @@
             <vm:MainViewModel/>
         </Window.DataContext>
 
-    <Grid Background="#101022">
+    <Grid Background="#131718">
     <!-- Grid Setup -->
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" /> <!-- Left Side Options -->
             <ColumnDefinition Width="Auto" />   <!-- Left Column Divider -->
-            <ColumnDefinition Width="Auto" />   <!-- Center File TreeView -->
-            <ColumnDefinition Width="Auto" />   <!-- Center Column Divider -->
             <ColumnDefinition Width="*" />   <!-- Main Content Area -->
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />  <!-- Title Bar -->
-            <RowDefinition Height="Auto" />     <!-- Top Divider -->
-            <RowDefinition Height="Auto" />     <!-- Top Workspaces -->
-            <RowDefinition Height="Auto" />     <!-- Main Divider -->
+            <RowDefinition Height="Auto" />  <!-- Workspace Bar -->
+            <RowDefinition Height="Auto" />     <!-- Divider -->
             <RowDefinition Height="*" />     <!-- Main Area -->
         </Grid.RowDefinitions>
-    <!-- Grid Content - Top Down Over -->
-    <!-- TitleBar -->
-        <Rectangle Grid.ColumnSpan="5" Grid.Row="0" Fill="#131718"></Rectangle>
-        <StackPanel Grid.Row="0" Grid.ColumnSpan="5" Orientation="Horizontal"
-                    HorizontalAlignment="Left" VerticalAlignment="Center" 
-                    Margin="5">
-            <Image Source="/Assets/FH-CFB-logo-j1a.png" Width="24" Height="24" Margin="2"/>
-            <TextBlock Text="{Binding Title}"
-                FontWeight="Bold" FontSize="14" Foreground="#FFFFFF" 
-                VerticalAlignment="Center" Margin="5, 0">
-            </TextBlock>
-            <TextBlock Text="{Binding Subtitle}"
-                FontWeight="Light" FontSize="14" Foreground="#FFFFFF" 
-                VerticalAlignment="Center" Margin="">
-            </TextBlock>
-        </StackPanel>
-        <!-- Top Divider -->
-        <Rectangle Grid.Row="1" Grid.ColumnSpan="5"
-                Fill="#292D2E" Height="2"/>
-
-
-    <!-- WorkspaceBar -->
+    <!-- Top - WorkspaceBar View 1-->
         <!-- Dynamically update depending on icon button press -->
-        <Rectangle Grid.ColumnSpan="5" Grid.Row="2" Fill="#131718"></Rectangle>
-            <StackPanel Grid.Row="2" Grid.ColumnSpan="5" HorizontalAlignment="Left" VerticalAlignment="Top" Orientation="Horizontal">            
-                <Border 
-                        Background="#3C5876" BorderThickness="0" 
-                        Padding="5" Margin="0">
-                    <TextBlock Text="{Binding CurrentWorkspaceTxt}" 
-                            FontWeight="Bold" FontSize="10" Foreground="Gray"/>
-                </Border>
-
-                <Button Command="{Binding AddToWorkspaceCommand}" 
-                        Background="Transparent" BorderThickness="0" 
-                        Padding="5" Margin="0">
-                    <TextBlock Text="{Binding AddToCurrentWorkspaceTxt}" 
-                            FontSize="10" Foreground="Gray"/>
+        <Rectangle Fill="#1F1F1F" Grid.Column="1" Grid.Row="0" Grid.ColumnSpan="2"></Rectangle>
+        <Grid Grid.Column="2" Grid.Row="0" ColumnDefinitions="Auto, *, Auto"
+                Margin="12, 4">      
+                <TextBlock Text="CurrentWorkspaceName" Grid.Column="0"
+                            FontSize="14" Foreground="White" 
+                            HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                <Button Command="" Grid.Column="2"
+                        Background="White" CornerRadius="6" 
+                        Padding="2" Margin="2"  
+                        HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Label FontSize="12" Foreground="#131718"
+                            HorizontalAlignment="Center" VerticalAlignment="Center">+ Watch folder</Label>
                 </Button>
-
-                <Button Command="{Binding SaveWorkspaceCommand}" 
-                        Background="Transparent" BorderThickness="0" 
-                        Padding="5" Margin="0">
-                    <TextBlock Text="{Binding SaveCurrentWorkspaceTxt}" 
-                            FontSize="10" Foreground="Gray"/>
-                </Button>
-                
-                <Button Command="{Binding UpdateWorkspaceCommand}" 
-                        Background="Transparent" BorderThickness="0" 
-                        Padding="5" Margin="0">
-                    <TextBlock Text="{Binding UpdateCurrentWorkspaceTxt}" 
-                            FontSize="10" Foreground="Gray"/>
-                </Button>
-                
-                <Button Command="{Binding RemoveWorkspaceCommand}" 
-                        Background="Transparent" BorderThickness="0" 
-                        Padding="5" Margin="0">
-                    <TextBlock Text="{Binding RemoveCurrentWorkspaceTxt}" 
-                            FontSize="10" Foreground="Gray"/>
-                </Button>
-        </StackPanel>
-        <!-- Main Divider -->
-        <Rectangle Grid.Row="3" Grid.ColumnSpan="5"
-                Fill="#292D2E" Height="2"/>
+        </Grid>
+        <!-- Workspace Divider -->
+        <Rectangle Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="2"
+                Fill="#292D2E" Height="1"/>
 
     <!-- Main Area -->
     <!-- LeftOptionsArea -->
@@ -104,44 +56,47 @@
             <Rectangle Fill="#131718" Grid.RowSpan="3"></Rectangle>
 
             <!-- Left Buttons -->
-            <StackPanel Grid.Row="1" Margin="5" HorizontalAlignment="Center" VerticalAlignment="Top" Orientation="Vertical">            
+            <StackPanel Grid.Row="1" Margin="12, 4" 
+                        HorizontalAlignment="Center" VerticalAlignment="Top" 
+                        Orientation="Vertical">            
                 <!-- Left Top - System Files + Current Workspace -->
-                <!-- System Files Button -->
-                <Button Command="{Binding ShowSystemFilesCommand}" 
-                        Height="30" Background="#ADADAD" CornerRadius="6" 
-                        Padding="5" Margin="5, 2.5" 
-                        HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <Label FontSize="10" Foreground="#131718">A</Label>
-                </Button>
-                <TextBlock Text="{Binding SystemFilesIconTxt}" 
-                        FontSize="8" Foreground="Gray" 
-                        HorizontalAlignment="Center"></TextBlock>
-                
-                <!-- Monitored Files Button -->
-                <Button Command="{Binding ShowMonitoredFilesCommand}" 
-                        Height="30" Background="#ADADAD" CornerRadius="6" 
-                        Padding="5" Margin="5, 2.5" 
-                        HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <Label FontSize="10" Foreground="#131718">B</Label>
-                </Button>
-                <TextBlock Text="{Binding MonitoredFilesIconTxt}" 
-                        FontSize="8" Foreground="Gray" 
-                        HorizontalAlignment="Center"></TextBlock>
-                
-                <!-- Workspaces Button -->
-                <Button Command="{Binding ShowWorkspaceFoldersCommand}" 
-                        Height="30" Background="#ADADAD" CornerRadius="6" 
-                        Padding="5" Margin="5, 2.5" 
-                        HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <Label FontSize="10" Foreground="#131718">C</Label>
-                </Button>
-                <TextBlock Text="{Binding WorkspacesTxt}" 
-                        FontSize="8" Foreground="Gray" 
-                        HorizontalAlignment="Center"></TextBlock>
+                <TextBlock Text="Workspaces" Margin="0, 0, 0, 8"
+                            FontSize="12" Foreground="White" 
+                            HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                <TextBlock Text="Watch Folders" Margin="0, 0, 0, 8"
+                            FontSize="12" Foreground="White" 
+                            HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                <!-- Spacer -->
+                <Rectangle Fill="#292D2E" Height="1" Margin="0, 0, 0, 8"></Rectangle>
+                <TextBlock Text="Recent Workspaces" Margin="0, 0, 0, 8"
+                            FontSize="8" Foreground="White" 
+                            HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                <TextBlock Text="Project 007" Margin="0, 0, 0, 8"
+                            FontSize="12" Foreground="White" 
+                            HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                <TextBlock Text="Social" Margin="0, 0, 0, 8"
+                            FontSize="12" Foreground="White" 
+                            HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                <TextBlock Text="Business A" Margin="0, 0, 0, 8"
+                            FontSize="12" Foreground="White" 
+                            HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                <!-- Spacer -->
+                <Rectangle Fill="#292D2E" Height="1" Margin="0, 0, 0, 8"></Rectangle>
+                <TextBlock Text="Watch Folders" Margin="0, 0, 0, 8"
+                            FontSize="8" Foreground="White" 
+                            HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                <TextBlock Text="Downloads" Margin="0, 0, 0, 8"
+                            FontSize="12" Foreground="White" 
+                            HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                <TextBlock Text="Photos" Margin="0, 0, 0, 8"
+                            FontSize="12" Foreground="White" 
+                            HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                <TextBlock Text="Stock" Margin="0, 0, 0, 8"
+                            FontSize="12" Foreground="White" 
+                            HorizontalAlignment="Left" VerticalAlignment="Top"/>
             </StackPanel>
-
+            <!-- Settings Button -->
             <StackPanel Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="5">
-                <!-- Settings Button -->
                 <Button Command="{Binding ShowSettingsCommand}" 
                         Height="30" Background="#ADADAD" CornerRadius="50" 
                         Padding="5" Margin="5, 2.5" 
@@ -152,45 +107,25 @@
                         FontSize="8" Foreground="Gray"></TextBlock>
             </StackPanel>
         </Grid>
-        <!-- Left Column Divider -->
-        <Rectangle Fill="#292D2E" Grid.Column="1" Grid.Row="4" Width="2"></Rectangle>
+        <!-- Column Divider -->
+        <Rectangle Fill="#292D2E" Grid.Column="1" Grid.RowSpan="3" Width=".5"></Rectangle>
 
-    <!--  CenterOptions -->
-        <!-- Center - File Treeview options -->
-         <DockPanel Grid.Column="2" Grid.Row="4" Margin="5">
-            <Button DockPanel.Dock="Top" FontSize="10"
-                    Command="{Binding RefreshDrivesCommand}"
-                    Content="Refresh" 
-                    Background="Gray" Foreground="Black"/>
-                    
-            <ListBox ItemsSource="{Binding Drives}" FontSize="10" 
-                    Background="#1F1F1F" Foreground="White" 
-                    BorderThickness="0" Padding="1" Margin="0, 1">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal" Spacing="4">
-                            <TextBlock Text="{Binding Name}" />
-                            <TextBlock Text="{Binding DriveType}" />
-                            <TextBlock Text="{Binding IsReady, StringFormat='Ready: {0}'}" />
-                            <TextBlock Text="{Binding DriveFormat}" 
-                                    IsVisible="{Binding IsReady}" />
-                        </StackPanel>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-        </DockPanel>
-        <!-- Center Column Divider -->
-        <Rectangle Fill="#292D2E" Grid.Column="3" Grid.Row="4" Width="2"></Rectangle>
-
-    <!--  RightMainView -->
+    
+    <!--  Gallery View 1 -->
         <!-- The Magic Gallery -->
-        <!-- Needs 3 Rows - title, line, gallery -->
+        <!-- Needs 3 Rows - filepath, line, gallery -->
         <Rectangle Grid.Column="4" Grid.Row="4" Fill="#1F1F1F"></Rectangle>
-        <TextBlock Grid.Column="4" Grid.Row="4" Foreground="Snow" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5">Gallery View</TextBlock>
-        <!-- Top Divider
-        <Rectangle Grid.Row="1" Grid.ColumnSpan="5"
-                Fill="#0C0C0D" Height="2"/>
-                    -->
+        <Grid Grid.Column="4" Grid.Row="4" 
+                Grid.ColumnDefinitions="Auto, Auto, *">
+            <TextBlock Grid.Column="0" Foreground="Snow" 
+                        HorizontalAlignment="Left" VerticalAlignment="Top" 
+                        Margin="12, 4">File TreeView</TextBlock>
+            <!-- Column Divider -->
+            <Rectangle Fill="#292D2E" Grid.Column="1" Grid.Row="4" Width="2"></Rectangle>
+            <TextBlock Grid.Column="2" Foreground="Snow" 
+                        HorizontalAlignment="Center" VerticalAlignment="Top" 
+                        Margin="12, 4">Gallery View - Filepath - Search</TextBlock>
+        </Grid>
     
     <!-- End Grid -->
     </Grid>

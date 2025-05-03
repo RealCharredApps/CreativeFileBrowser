@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.ObjectModel;
 using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -16,8 +17,10 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private string _subtitle = "Creative File Browser";
 
+
     [ObservableProperty]
-    private ObservableCollection<DriveInfo> _drives;
+    private ObservableCollection<SimpleDriveInfo> _drives;
+
 
     // Current view state - determines which UI elements are visible
     [ObservableProperty]
@@ -84,15 +87,21 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private WorkspaceItem? selectedWorkspace;
 
+    // Command to load drives
+    public IRelayCommand LoadDrivesCommand { get; }
+
     // Constructor initializes default state
     public MainViewModel()
     {
         UpdateViewState(ViewType.SystemFiles);
         // Initialize the collection
-        Drives = new ObservableCollection<DriveInfo>();
+        Drives = new ObservableCollection<SimpleDriveInfo>();
+
+        // Initialize the LoadDrivesCommand
+        LoadDrivesCommand = new RelayCommand(LoadDrives);
 
         // Load drives when created
-        LoadDrives();
+        LoadDrivesCommand.Execute(null);
     }
 
     // Updates UI based on selected view
@@ -168,7 +177,7 @@ public partial class MainViewModel : ObservableObject
         // Get all drives and add to the collection
         foreach (var drive in DriveInfo.GetDrives())
         {
-            Drives.Add(drive);
+            Drives.Add(new SimpleDriveInfo(drive));
         }
     }
 
@@ -179,6 +188,48 @@ public partial class MainViewModel : ObservableObject
     private void RefreshDrives()
     {
         LoadDrives();
+    }
+
+    // Simple drive info class with user-friendly properties
+    public class SimpleDriveInfo
+    {
+        public string DriveLetter { get; set; }
+        public DriveType DriveType { get; set; }
+        public bool IsReady { get; set; }
+        public string VolumeLabel { get; set; }
+        public DriveInfo OriginalDriveInfo { get; set; }
+
+        /// <summary>
+        /// Gets default label for drives with no volume label
+        /// </summary>
+        private string GetDefaultLabel(DriveInfo drive)
+        {
+            return drive.DriveType switch
+            {
+                DriveType.Fixed => "Local Disk",
+                DriveType.Removable => "Removable Drive",
+                DriveType.Network => "Network Drive",
+                _ => "Drive"
+            };
+        }
+        public SimpleDriveInfo(DriveInfo driveInfo)
+        {
+            DriveLetter = driveInfo.Name;
+            DriveType = driveInfo.DriveType;
+            OriginalDriveInfo = driveInfo;
+            VolumeLabel = string.Empty; // Initialize with a default value
+
+            // Only access these properties if the drive is ready
+            if (driveInfo.IsReady)
+            {
+                IsReady = true;
+                VolumeLabel = driveInfo.VolumeLabel;
+                foreach (DriveInfo drive in DriveInfo.GetDrives())
+                {
+                    Console.WriteLine($"Drive {DriveLetter} is ready with label: {VolumeLabel}");
+                }
+            }
+        }
     }
 
 

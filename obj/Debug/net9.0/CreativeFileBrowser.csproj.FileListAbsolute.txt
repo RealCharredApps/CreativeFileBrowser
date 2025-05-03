@@ -66,3 +66,6 @@
 /Library/CodeProjects/CreativeFileBrowser_Scratch_Avalonia/CreativeFileBrowser/obj/Debug/net9.0/Creative.4895ED83.Up2Date
 /Library/CodeProjects/CreativeFileBrowser_Scratch_Avalonia/CreativeFileBrowser/obj/Debug/net9.0/CreativeFileBrowser.genruntimeconfig.cache
 /Library/CodeProjects/CreativeFileBrowser_Scratch_Avalonia/CreativeFileBrowser/obj/Debug/net9.0/ref/CreativeFileBrowser.dll
+/Library/CodeProjects/CreativeFileBrowser_Scratch_Avalonia/CreativeFileBrowser/obj/Debug/net9.0/CreativeFileBrowser.dll
+/Library/CodeProjects/CreativeFileBrowser_Scratch_Avalonia/CreativeFileBrowser/obj/Debug/net9.0/refint/CreativeFileBrowser.dll
+/Library/CodeProjects/CreativeFileBrowser_Scratch_Avalonia/CreativeFileBrowser/obj/Debug/net9.0/CreativeFileBrowser.pdb
