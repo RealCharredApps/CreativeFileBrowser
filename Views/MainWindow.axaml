@@ -60,6 +60,9 @@
                         HorizontalAlignment="Center" VerticalAlignment="Top" 
                         Orientation="Vertical">            
                 <!-- Left Top - System Files + Current Workspace -->
+                <TextBlock Text="System Files" Margin="0, 0, 0, 8"
+                            FontSize="12" Foreground="White" 
+                            HorizontalAlignment="Left" VerticalAlignment="Top"/>
                 <TextBlock Text="Workspaces" Margin="0, 0, 0, 8"
                             FontSize="12" Foreground="White" 
                             HorizontalAlignment="Left" VerticalAlignment="Top"/>
