@@ -3,8 +3,8 @@
         xmlns:vm="using:CreativeFileBrowser.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="570" d:DesignHeight="400"
-        Width="570" Height="400"
+        mc:Ignorable="d" d:DesignWidth="570" d:DesignHeight="420"
+        Width="570" Height="420"
         x:Class="CreativeFileBrowser.Views.MainWindow"
         x:DataType="vm:MainViewModel"
         Icon="/Assets/avalonia-logo.ico"
@@ -17,8 +17,119 @@
         <Window.DataContext>
             <vm:MainViewModel/>
         </Window.DataContext>
+    <!-- Styles Setup -->
+        <Window.Styles>
+            <Style Selector="Window">
+                <Setter Property="Background" Value="#131718"/>
+            </Style>
+            <Style Selector="TextBlock.h1">
+                <Setter Property="FontFamily" Value="Roboto"/>
+                <Setter Property="FontSize" Value="16"/>
+                <Setter Property="Foreground" Value="#F7F7F7"/>
+            </Style>
+            <Style Selector="TextBlock.h2">
+                <Setter Property="FontFamily" Value="Roboto"/>
+                <Setter Property="FontSize" Value="10"/>
+                <Setter Property="Foreground" Value="White"/>
+            </Style>
+            <Style Selector="TextBlock.h3">
+                <Setter Property="FontFamily" Value="Roboto"/>
+                <Setter Property="FontSize" Value="8"/>
+                <Setter Property="Foreground" Value="White"/>
+            </Style>
+            <Style Selector="TextBlock.b1">
+                <Setter Property="FontFamily" Value="Roboto"/>
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="Foreground" Value="White"/>
+            </Style>
+            <Style Selector="Label.p1">
+                <Setter Property="FontFamily" Value="Roboto"/>
+                <Setter Property="FontSize" Value="10"/>
+                <Setter Property="Foreground" Value="White"/>
+            </Style>
+            <Style Selector="Label.p2">
+                <Setter Property="FontFamily" Value="Roboto"/>
+                <Setter Property="FontSize" Value="8"/>
+                <Setter Property="Foreground" Value="White"/>
+            </Style>
+            <Style Selector="Button.b1">
+                <Setter Property="Background" Value="White"/>
+                <Setter Property="CornerRadius" Value="6"/>
+                <Setter Property="Padding" Value="2"/>
+                <Setter Property="Margin" Value="2"/>
 
-    <Grid Background="#131718">
+                <Style Selector="^:pointerover">
+                    <Setter Property="Background" Value="LightGray"/>
+                </Style>
+            </Style>
+            <Style Selector="Button.b2">
+                <Setter Property="Background" Value="#EA9542"/>
+                <Setter Property="CornerRadius" Value="6"/>
+                <Setter Property="Padding" Value="2"/>
+                <Setter Property="Margin" Value="2"/>
+
+                <Style Selector="^:pointerover">
+                    <Setter Property="Background" Value="#EFC47B"/>
+                </Style>
+            </Style>
+            <Style Selector="Button.b3">
+                <Setter Property="Background" Value="#96C8C2"/>
+                <Setter Property="CornerRadius" Value="6"/>
+                <Setter Property="Padding" Value="2"/>
+                <Setter Property="Margin" Value="2"/>
+
+                <Style Selector="^:pointerover">
+                    <Setter Property="Background" Value="#769E98"/>
+                </Style>
+            </Style>
+            <Style Selector="Label.bt1">
+                <Setter Property="FontFamily" Value="Roboto"/>
+                <Setter Property="FontSize" Value="16"/>
+                <Setter Property="Foreground" Value="#131718"/>
+                <Setter Property="HorizontalAlignment" Value="Center"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+            </Style>
+            <Style Selector="Label.bt2">
+                <Setter Property="FontFamily" Value="Roboto"/>
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="Foreground" Value="#131718"/>
+                <Setter Property="HorizontalAlignment" Value="Center"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+            </Style>
+            <Style Selector="Label.bt3">
+                <Setter Property="FontFamily" Value="Roboto"/>
+                <Setter Property="FontSize" Value="10"/>
+                <Setter Property="Foreground" Value="#131718"/>
+                <Setter Property="HorizontalAlignment" Value="Center"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+            </Style>
+            <Style Selector="TextBlock.l1">
+                <Setter Property="FontFamily" Value="Roboto"/>
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="Foreground" Value="#F7F7F7"/>
+                <Setter Property="Margin" Value="0, 0, 0, 8"/>
+                <Setter Property="HorizontalAlignment" Value="Left"/>
+                <Setter Property="VerticalAlignment" Value="Top"/>
+            </Style>
+            <Style Selector="TextBlock.l2">
+                <Setter Property="FontFamily" Value="Roboto"/>
+                <Setter Property="FontSize" Value="10"/>
+                <Setter Property="Foreground" Value="#A8A9A9"/>
+                <Setter Property="Margin" Value="0, 0, 0, 8"/>
+                <Setter Property="HorizontalAlignment" Value="Left"/>
+                <Setter Property="VerticalAlignment" Value="Top"/>
+            </Style>
+            <Style Selector="TextBlock.l3">
+                <Setter Property="FontFamily" Value="Roboto"/>
+                <Setter Property="FontSize" Value="8"/>
+                <Setter Property="Foreground" Value="#A8A9A9"/>
+                <Setter Property="Margin" Value="0, 0, 0, 8"/>
+                <Setter Property="HorizontalAlignment" Value="Left"/>
+                <Setter Property="VerticalAlignment" Value="Top"/>
+            </Style>
+        </Window.Styles>
+
+    <Grid>
     <!-- Grid Setup -->
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" /> <!-- Left Side Options -->
@@ -31,26 +142,22 @@
             <RowDefinition Height="*" />     <!-- Main Area -->
         </Grid.RowDefinitions>
     <!-- Top - WorkspaceBar View 1-->
-        <!-- Dynamically update depending on icon button press -->
+        <!-- Dynamically update depending on left press -->
         <Rectangle Fill="#1F1F1F" Grid.Column="1" Grid.Row="0" Grid.ColumnSpan="2"></Rectangle>
         <Grid Grid.Column="2" Grid.Row="0" ColumnDefinitions="Auto, *, Auto"
                 Margin="12, 4">      
-                <TextBlock Text="CurrentWorkspaceName" Grid.Column="0"
-                            FontSize="14" Foreground="White" 
+                <TextBlock Classes="h1" Text="CurrentViewName" Grid.Column="0"
                             HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                <Button Command="" Grid.Column="2"
-                        Background="White" CornerRadius="6" 
-                        Padding="2" Margin="2"  
+                <Button Command="" Grid.Column="2" Classes="b2"
                         HorizontalAlignment="Right" VerticalAlignment="Center">
-                    <Label FontSize="12" Foreground="#131718"
-                            HorizontalAlignment="Center" VerticalAlignment="Center">+ Watch folder</Label>
+                    <Label Classes="bt1"
+                            HorizontalAlignment="Center" VerticalAlignment="Center">+</Label>
                 </Button>
         </Grid>
         <!-- Workspace Divider -->
         <Rectangle Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="2"
                 Fill="#292D2E" Height="1"/>
 
-    <!-- Main Area -->
     <!-- LeftOptionsArea -->
         <Grid Grid.Column="0" Grid.Row="4" RowDefinitions="Auto, Auto, *, Auto">
             <Rectangle Fill="#131718" Grid.RowSpan="3"></Rectangle>
@@ -60,54 +167,38 @@
                         HorizontalAlignment="Center" VerticalAlignment="Top" 
                         Orientation="Vertical">
                 <!-- Left Top - System Files + Current Workspace -->
-                <TextBlock Text="System Files" Margin="0, 0, 0, 8"
-                            FontSize="12" Foreground="White" 
-                            HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                <TextBlock Text="Workspaces" Margin="0, 0, 0, 8"
-                            FontSize="12" Foreground="White" 
-                            HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                <TextBlock Text="Watch Folders" Margin="0, 0, 0, 8"
-                            FontSize="12" Foreground="White" 
-                            HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                <StackPanel Orientation="Horizontal" 
+                            HorizontalAlignment="Left" VerticalAlignment="Center">
+                    <Button Command="" Classes="b2" Margin="0, 0, 8, 8"
+                            HorizontalAlignment="Left" VerticalAlignment="Center">
+                        <Label Classes="bt2">+</Label>
+                    </Button>
+                    <TextBlock Classes="l2" Text="Add Folder" VerticalAlignment="Center"/>
+                </StackPanel>
+                <TextBlock Text="System Files" Classes="l1"/>
+                <TextBlock Text="Workspaces" Classes="l1"/>
+                <TextBlock Text="Watch Folders" Classes="l1"/>
                 <!-- Spacer -->
                 <Rectangle Fill="#292D2E" Height="1" Margin="0, 0, 0, 8"></Rectangle>
-                <TextBlock Text="Recent Workspaces" Margin="0, 0, 0, 8"
-                            FontSize="8" Foreground="White" 
-                            HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                <TextBlock Text="Project 007" Margin="0, 0, 0, 8"
-                            FontSize="12" Foreground="White" 
-                            HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                <TextBlock Text="Social" Margin="0, 0, 0, 8"
-                            FontSize="12" Foreground="White" 
-                            HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                <TextBlock Text="Business A" Margin="0, 0, 0, 8"
-                            FontSize="12" Foreground="White" 
-                            HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                <TextBlock Text="Recent Workspaces" Classes="l2"/>
+                <TextBlock Text="Project 007" Classes="l1"/>
+                <TextBlock Text="Social" Classes="l1"/>
+                <TextBlock Text="Business A" Classes="l1"/>
                 <!-- Spacer -->
                 <Rectangle Fill="#292D2E" Height="1" Margin="0, 0, 0, 8"></Rectangle>
-                <TextBlock Text="Watch Folders" Margin="0, 0, 0, 8"
-                            FontSize="8" Foreground="White" 
-                            HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                <TextBlock Text="Downloads" Margin="0, 0, 0, 8"
-                            FontSize="12" Foreground="White" 
-                            HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                <TextBlock Text="Photos" Margin="0, 0, 0, 8"
-                            FontSize="12" Foreground="White" 
-                            HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                <TextBlock Text="Stock" Margin="0, 0, 0, 8"
-                            FontSize="12" Foreground="White" 
-                            HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                <TextBlock Text="Watch Folders" Classes="l2"/>
+                <TextBlock Text="Downloads" Classes="l1"/>
+                <TextBlock Text="Photos" Classes="l1"/>
+                <TextBlock Text="Stock" Classes="l1"/>
             </StackPanel>
             <!-- Settings Button -->
             <StackPanel Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="5">
                 <Button Command="{Binding ShowSettingsCommand}" 
-                        Height="30" Background="#ADADAD" CornerRadius="50" 
-                        Padding="5" Margin="5, 2.5" 
-                        HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <Label FontSize="10" Foreground="#131718">H</Label>
+                        Classes="b3" HorizontalAlignment="Center">
+                    <Label Classes="bt3" Foreground="#131718">O</Label>
                 </Button>
-                <TextBlock Text="{Binding UserSettingsTxt}" 
-                        FontSize="8" Foreground="Gray"></TextBlock>
+                <TextBlock Text="Settings" 
+                        Classes="l2" Margin="4"></TextBlock>
             </StackPanel>
         </Grid>
         <!-- Column Divider -->
@@ -120,14 +211,14 @@
         <Rectangle Grid.Column="4" Grid.Row="4" Fill="#1F1F1F"></Rectangle>
         <Grid Grid.Column="4" Grid.Row="4" 
                 Grid.ColumnDefinitions="Auto, Auto, *">
-            <TextBlock Grid.Column="0" Foreground="Snow" 
+            <TextBlock Grid.Column="0" Classes="h2" Text="File TreeView"
                         HorizontalAlignment="Left" VerticalAlignment="Top" 
-                        Margin="12, 4">File TreeView</TextBlock>
+                        Margin="12, 4"></TextBlock>
             <!-- Column Divider -->
             <Rectangle Fill="#292D2E" Grid.Column="1" Grid.Row="4" Width="2"></Rectangle>
-            <TextBlock Grid.Column="2" Foreground="Snow" 
+            <TextBlock Grid.Column="2" Classes="h2" Text="Gallery View - Filepath - Search"
                         HorizontalAlignment="Center" VerticalAlignment="Top" 
-                        Margin="12, 4">Gallery View - Filepath - Search</TextBlock>
+                        Margin="12, 4"></TextBlock>
         </Grid>
     
     <!-- End Grid -->
