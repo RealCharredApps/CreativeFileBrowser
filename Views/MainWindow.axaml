@@ -3,6 +3,8 @@
         xmlns:vm="using:CreativeFileBrowser.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="using:FileExplorer"
+        xmlns:converters="using:CreativeFileBrowser.Converters"
         mc:Ignorable="d" d:DesignWidth="570" d:DesignHeight="450"
         Width="570" Height="450"
         x:Class="CreativeFileBrowser.Views.MainWindow"
@@ -13,7 +15,6 @@
         <Design.DataContext>
             <vm:MainViewModel/>
         </Design.DataContext>
-
         <Window.DataContext>
             <vm:MainViewModel/>
         </Window.DataContext>
@@ -179,6 +180,10 @@
             </Style>
         </Window.Styles>
 
+    <Window.Resources>
+        <converters:FolderIconConverter x:Key="FolderIconConverter"/>
+    </Window.Resources>
+   
     <Grid>
     <!-- Grid Setup -->
         <Grid.ColumnDefinitions>
@@ -302,21 +307,31 @@
                     <Button Command="" Classes="b0">
                         <Label Classes="lb1" >C Drive</Label>
                     </Button>
-                    <Button Command="" Classes="b0">
-                        <Label Classes="lb1" >D Drive</Label>
-                    </Button>
-                    <!-- Spacer -->
-                    <Rectangle Fill="#292D2E" Height="1" Width="75"
-                                Margin="8, 0, 0, 8" HorizontalAlignment="Left"></Rectangle>
-                    <Button Command="" Classes="b0">
-                        <Label Classes="lb1" >Downloads</Label>
-                    </Button>
-                    <Button Command="" Classes="b0">
-                        <Label Classes="lb1" >Photos</Label>
-                    </Button>
-                    <Button Command="" Classes="b0">
-                        <Label Classes="lb1" >Stock</Label>
-                    </Button>
+
+                    <!-- File tree view -->
+                    <TreeView Grid.Column="0" 
+                            ItemsSource="{Binding FileExplorer.RootItems}"
+                            SelectedItem="{Binding FileExplorer.SelectedItem}">
+                        <TreeView.ItemTemplate>
+                            <TreeDataTemplate ItemsSource="{Binding Children}">
+                                <StackPanel Orientation="Horizontal" 
+                                            Spacing="5"
+                                            DoubleTapped="OnItemDoubleTapped">
+                                    <Image Width="16" Height="16">
+                                        <Image.Source>
+                                            <DrawingImage>
+                                                <DrawingImage.Drawing>
+                                                    <GeometryDrawing Brush="{Binding IsDirectory, Converter={StaticResource FolderIconConverter}}"
+                                                                    Geometry="M 0,0 L 16,0 16,16 0,16 Z" />
+                                                </DrawingImage.Drawing>
+                                            </DrawingImage>
+                                        </Image.Source>
+                                    </Image>
+                                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </TreeDataTemplate>
+                        </TreeView.ItemTemplate>
+                    </TreeView>
                 </StackPanel>
             <!-- Column Divider -->
                 <Rectangle Fill="#292D2E" Grid.Column="1" Grid.Row="4" Width="1"></Rectangle>
@@ -332,8 +347,24 @@
                             Margin="12, 4"></TextBlock>
                     <!-- Spacer -->
                     <Rectangle Fill="#292D2E" Height="1" Margin="0, 0, 0, 8"></Rectangle>
-                    <TextBlock Classes="b1" Text="Some File Visuals"
-                                Margin="8, 4"/>
+                    <!-- Content/preview pane -->
+                        <Grid Grid.Column="1" RowDefinitions="Auto,*">
+                            <!-- Path navigation bar -->
+                            <TextBox Grid.Row="0" 
+                                    Text="{Binding FileExplorer.CurrentPath}" 
+                                    Margin="5" 
+                                    IsReadOnly="True"/>
+                            
+                            <!-- File preview area -->
+                            <Border Grid.Row="1" 
+                                    BorderBrush="Gray" 
+                                    BorderThickness="1" 
+                                    Margin="5">
+                                <ContentControl Content="{Binding FileExplorer.FilePreview}"
+                                                Margin="5"
+                                                />
+                            </Border>
+                        </Grid>
                 </StackPanel>
         </Grid>
     

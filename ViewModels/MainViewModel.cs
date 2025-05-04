@@ -16,12 +16,8 @@ public partial class MainViewModel : ObservableObject
     // SubTitle Top Area
     [ObservableProperty]
     private string _subtitle = "Creative File Browser";
-
-
     [ObservableProperty]
     private ObservableCollection<SimpleDriveInfo> _drives;
-
-
     // Current view state - determines which UI elements are visible
     [ObservableProperty]
     private ViewType currentView = ViewType.SystemFiles;
@@ -64,6 +60,8 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private string _userSettingsTxt = "Settings";
 
+
+
     // Settings View popup//
     [RelayCommand]
     private void ShowSettings()
@@ -75,6 +73,8 @@ public partial class MainViewModel : ObservableObject
 
     // Top Dynamic - Options Area - If System Files, show filepath
     // View 1 - System Files 
+    private FileExplorerViewModel? _fileExplorer;
+    public FileExplorerViewModel FileExplorer => _fileExplorer ??= new FileExplorerViewModel();
     // View 2 - Monitored Folders
     [ObservableProperty]
     private string currentFilePath = string.Empty;
@@ -96,10 +96,10 @@ public partial class MainViewModel : ObservableObject
         UpdateViewState(ViewType.SystemFiles);
         // Initialize the collection
         Drives = new ObservableCollection<SimpleDriveInfo>();
-
+        // Initialize the FileExplorer
+        _fileExplorer = new FileExplorerViewModel();
         // Initialize the LoadDrivesCommand
         LoadDrivesCommand = new RelayCommand(LoadDrives);
-
         // Load drives when created
         LoadDrivesCommand.Execute(null);
     }
