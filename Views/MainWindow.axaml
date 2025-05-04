@@ -3,8 +3,8 @@
         xmlns:vm="using:CreativeFileBrowser.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="570" d:DesignHeight="420"
-        Width="570" Height="420"
+        mc:Ignorable="d" d:DesignWidth="570" d:DesignHeight="450"
+        Width="570" Height="450"
         x:Class="CreativeFileBrowser.Views.MainWindow"
         x:DataType="vm:MainViewModel"
         Icon="/Assets/avalonia-logo.ico"
@@ -29,7 +29,7 @@
             </Style>
             <Style Selector="TextBlock.h2">
                 <Setter Property="FontFamily" Value="Roboto"/>
-                <Setter Property="FontSize" Value="10"/>
+                <Setter Property="FontSize" Value="12"/>
                 <Setter Property="Foreground" Value="White"/>
             </Style>
             <Style Selector="TextBlock.h3">
@@ -52,6 +52,16 @@
                 <Setter Property="FontSize" Value="8"/>
                 <Setter Property="Foreground" Value="White"/>
             </Style>
+            <Style Selector="Button.b0">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="CornerRadius" Value="6"/>
+                <Setter Property="Padding" Value="4, 0"/>
+                <Setter Property="Margin" Value="0, 0, 0, 4"/>
+
+                <Style Selector="^:pointerover">
+                    <Setter Property="Background" Value="Gray"/>
+                </Style>
+            </Style>
             <Style Selector="Button.b1">
                 <Setter Property="Background" Value="White"/>
                 <Setter Property="CornerRadius" Value="6"/>
@@ -73,13 +83,33 @@
                 </Style>
             </Style>
             <Style Selector="Button.b3">
-                <Setter Property="Background" Value="#96C8C2"/>
+                <Setter Property="Background" Value="#EFC47B"/>
                 <Setter Property="CornerRadius" Value="6"/>
                 <Setter Property="Padding" Value="2"/>
                 <Setter Property="Margin" Value="2"/>
 
                 <Style Selector="^:pointerover">
-                    <Setter Property="Background" Value="#769E98"/>
+                    <Setter Property="Background" Value="#F2DDB3"/>
+                </Style>
+            </Style>
+            <Style Selector="Button.b4">
+                <Setter Property="Background" Value="#F2DDB3"/>
+                <Setter Property="CornerRadius" Value="6"/>
+                <Setter Property="Padding" Value="2"/>
+                <Setter Property="Margin" Value="2"/>
+
+                <Style Selector="^:pointerover">
+                    <Setter Property="Background" Value="#F2E2D0"/>
+                </Style>
+            </Style>
+            <Style Selector="Button.b5">
+                <Setter Property="Background" Value="#F2E2D0"/>
+                <Setter Property="CornerRadius" Value="6"/>
+                <Setter Property="Padding" Value="2"/>
+                <Setter Property="Margin" Value="2"/>
+
+                <Style Selector="^:pointerover">
+                    <Setter Property="Background" Value="#FFEEE6"/>
                 </Style>
             </Style>
             <Style Selector="Label.bt1">
@@ -107,7 +137,6 @@
                 <Setter Property="FontFamily" Value="Roboto"/>
                 <Setter Property="FontSize" Value="12"/>
                 <Setter Property="Foreground" Value="#F7F7F7"/>
-                <Setter Property="Margin" Value="0, 0, 0, 8"/>
                 <Setter Property="HorizontalAlignment" Value="Left"/>
                 <Setter Property="VerticalAlignment" Value="Top"/>
             </Style>
@@ -126,6 +155,27 @@
                 <Setter Property="Margin" Value="0, 0, 0, 8"/>
                 <Setter Property="HorizontalAlignment" Value="Left"/>
                 <Setter Property="VerticalAlignment" Value="Top"/>
+            </Style>
+            <Style Selector="Label.lb1">
+                <Setter Property="FontFamily" Value="Roboto"/>
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="Foreground" Value="#F7F7F7"/>
+                <Setter Property="HorizontalAlignment" Value="Left"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+            </Style>
+            <Style Selector="Label.lb2">
+                <Setter Property="FontFamily" Value="Roboto"/>
+                <Setter Property="FontSize" Value="10"/>
+                <Setter Property="Foreground" Value="#A8A9A9"/>
+                <Setter Property="HorizontalAlignment" Value="Left"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+            </Style>
+            <Style Selector="Label.lb3">
+                <Setter Property="FontFamily" Value="Roboto"/>
+                <Setter Property="FontSize" Value="8"/>
+                <Setter Property="Foreground" Value="#A8A9A9"/>
+                <Setter Property="HorizontalAlignment" Value="Left"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
             </Style>
         </Window.Styles>
 
@@ -146,12 +196,13 @@
         <Rectangle Fill="#1F1F1F" Grid.Column="1" Grid.Row="0" Grid.ColumnSpan="2"></Rectangle>
         <Grid Grid.Column="2" Grid.Row="0" ColumnDefinitions="Auto, *, Auto"
                 Margin="12, 4">      
-                <TextBlock Classes="h1" Text="CurrentViewName" Grid.Column="0"
+                <TextBlock Classes="h1" Text="Binding CurrentViewName" Grid.Column="0"
                             HorizontalAlignment="Left" VerticalAlignment="Center"/>
                 <Button Command="" Grid.Column="2" Classes="b2"
-                        HorizontalAlignment="Right" VerticalAlignment="Center">
-                    <Label Classes="bt1"
-                            HorizontalAlignment="Center" VerticalAlignment="Center">+</Label>
+                        HorizontalAlignment="Right" VerticalAlignment="Center"
+                        Width="24" Height="24">
+                    <Label Classes="bt1" HorizontalAlignment="Center" 
+                            VerticalAlignment="Center" FontSize="12">+</Label>
                 </Button>
         </Grid>
         <!-- Workspace Divider -->
@@ -165,36 +216,53 @@
             <!-- Left Buttons -->
             <StackPanel Grid.Row="1" Margin="12, 4" 
                         HorizontalAlignment="Center" VerticalAlignment="Top" 
-                        Orientation="Vertical">
-                <!-- Left Top - System Files + Current Workspace -->
+                        Orientation="Vertical">                            
+                <Button Command="" Classes="b0">
+                    <Label Classes="lb1" >System Files</Label>
+                </Button>
+                <Button Command="" Classes="b0">
+                    <Label Classes="lb1" >Monitor List</Label>
+                </Button>
+                <!-- Spacer -->
+                <Rectangle Fill="#292D2E" Height="1" Margin="0, 0, 0, 8"></Rectangle>
                 <StackPanel Orientation="Horizontal" 
-                            HorizontalAlignment="Left" VerticalAlignment="Center">
-                    <Button Command="" Classes="b2" Margin="0, 0, 8, 8"
-                            HorizontalAlignment="Left" VerticalAlignment="Center">
+                            HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0, 0, 0, 4">
+                    <Button Command="" Classes="b2" Margin="0, 0, 4, 0"
+                            Width="24" Height="24">
                         <Label Classes="bt2">+</Label>
                     </Button>
-                    <TextBlock Classes="l2" Text="Add Folder" VerticalAlignment="Center"/>
+                    <TextBlock Classes="l1" Text="Monitor Folder"
+                                VerticalAlignment="Center"/>
                 </StackPanel>
-                <TextBlock Text="System Files" Classes="l1"/>
-                <TextBlock Text="Workspaces" Classes="l1"/>
-                <TextBlock Text="Watch Folders" Classes="l1"/>
+                <StackPanel Orientation="Horizontal" Margin="0, 0, 0, 4" 
+                            HorizontalAlignment="Left" VerticalAlignment="Center">
+                    <Button Command="" Classes="b4" Margin="0, 0, 4, 0"
+                            Width="24" Height="24">
+                        <Label Classes="bt2">+</Label>
+                    </Button>
+                    <TextBlock Classes="l1" Text="New Workspace"
+                                VerticalAlignment="Center"/>
+                </StackPanel>
                 <!-- Spacer -->
                 <Rectangle Fill="#292D2E" Height="1" Margin="0, 0, 0, 8"></Rectangle>
-                <TextBlock Text="Recent Workspaces" Classes="l2"/>
-                <TextBlock Text="Project 007" Classes="l1"/>
-                <TextBlock Text="Social" Classes="l1"/>
-                <TextBlock Text="Business A" Classes="l1"/>
-                <!-- Spacer -->
-                <Rectangle Fill="#292D2E" Height="1" Margin="0, 0, 0, 8"></Rectangle>
-                <TextBlock Text="Watch Folders" Classes="l2"/>
-                <TextBlock Text="Downloads" Classes="l1"/>
-                <TextBlock Text="Photos" Classes="l1"/>
-                <TextBlock Text="Stock" Classes="l1"/>
+                <Button Command="" Classes="b0">
+                    <Label Classes="lb2" >Workspaces</Label>
+                </Button>
+                <Button Command="" Classes="b0">
+                    <Label Classes="lb1" >Project 007</Label>
+                </Button>
+                <Button Command="" Classes="b0">
+                    <Label Classes="lb1" >Social</Label>
+                </Button>
+                <Button Command="" Classes="b0">
+                    <Label Classes="lb1">Business A</Label>
+                </Button>
             </StackPanel>
             <!-- Settings Button -->
-            <StackPanel Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="5">
+            <StackPanel Grid.Row="2" HorizontalAlignment="Center" 
+                        VerticalAlignment="Bottom" Margin="4">
                 <Button Command="{Binding ShowSettingsCommand}" 
-                        Classes="b3" HorizontalAlignment="Center">
+                        Classes="b5" HorizontalAlignment="Center">
                     <Label Classes="bt3" Foreground="#131718">O</Label>
                 </Button>
                 <TextBlock Text="Settings" 
@@ -205,20 +273,68 @@
         <Rectangle Fill="#292D2E" Grid.Column="1" Grid.RowSpan="3" Width=".5"></Rectangle>
 
     
-    <!--  Gallery View 1 -->
-        <!-- The Magic Gallery -->
-        <!-- Needs 3 Rows - filepath, line, gallery -->
+    <!-- The Magic Gallery -->
         <Rectangle Grid.Column="4" Grid.Row="4" Fill="#1F1F1F"></Rectangle>
         <Grid Grid.Column="4" Grid.Row="4" 
                 Grid.ColumnDefinitions="Auto, Auto, *">
-            <TextBlock Grid.Column="0" Classes="h2" Text="File TreeView"
-                        HorizontalAlignment="Left" VerticalAlignment="Top" 
-                        Margin="12, 4"></TextBlock>
+            <!-- Gallery View Right - Left-Center Column -->
+                <StackPanel Grid.Column="0" >
+                    <TextBlock Classes="l2" Text="Binding View x2"
+                            HorizontalAlignment="Left" VerticalAlignment="Center" 
+                            Margin="8"></TextBlock>
+                    <StackPanel Orientation="Horizontal" 
+                            HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0, 0, 0, 4">
+                        <Button Command="" Classes="b4" Margin="0, 0, 4, 0"
+                                VerticalAlignment="Center"
+                                Width="16" Height="16" CornerRadius="50">
+                            <Label Classes="bt2" FontSize="4"
+                                    VerticalAlignment="Center">—</Label>
+                        </Button>
+                        <TextBlock Classes="l1" Text="Toggle Recursive"
+                                    FontSize="8" 
+                                    VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <!-- Spacer 
+                    <Rectangle Fill="#292D2E" Height="1" Margin="0, 0, 0, 8"></Rectangle>
+                    -->
+                    <!-- Spacer -->
+                    <Rectangle Fill="#292D2E" Height="1" Margin="0, 0, 0, 8"></Rectangle>
+                    <Button Command="" Classes="b0">
+                        <Label Classes="lb1" >C Drive</Label>
+                    </Button>
+                    <Button Command="" Classes="b0">
+                        <Label Classes="lb1" >D Drive</Label>
+                    </Button>
+                    <!-- Spacer -->
+                    <Rectangle Fill="#292D2E" Height="1" Width="75"
+                                Margin="8, 0, 0, 8" HorizontalAlignment="Left"></Rectangle>
+                    <Button Command="" Classes="b0">
+                        <Label Classes="lb1" >Downloads</Label>
+                    </Button>
+                    <Button Command="" Classes="b0">
+                        <Label Classes="lb1" >Photos</Label>
+                    </Button>
+                    <Button Command="" Classes="b0">
+                        <Label Classes="lb1" >Stock</Label>
+                    </Button>
+                </StackPanel>
             <!-- Column Divider -->
-            <Rectangle Fill="#292D2E" Grid.Column="1" Grid.Row="4" Width="2"></Rectangle>
-            <TextBlock Grid.Column="2" Classes="h2" Text="Gallery View - Filepath - Search"
-                        HorizontalAlignment="Center" VerticalAlignment="Top" 
-                        Margin="12, 4"></TextBlock>
+                <Rectangle Fill="#292D2E" Grid.Column="1" Grid.Row="4" Width="1"></Rectangle>
+            <!-- Gallery Right -->
+                <StackPanel Grid.Column="2" >
+                    <TextBlock Grid.Column="2" Classes="h2" Text="Binding Gallery Views - Search - Refresh - Filters"
+                            HorizontalAlignment="Left" VerticalAlignment="Top" 
+                            Margin="12, 4"></TextBlock>
+                    <!-- Spacer -->
+                    <Rectangle Fill="#292D2E" Height="1" Margin="0"></Rectangle>
+                    <TextBlock Classes="l3" Text="Filepath/StrungOut?Here/Shown/Copy-able.filetype"
+                            HorizontalAlignment="Left" VerticalAlignment="Center" 
+                            Margin="12, 4"></TextBlock>
+                    <!-- Spacer -->
+                    <Rectangle Fill="#292D2E" Height="1" Margin="0, 0, 0, 8"></Rectangle>
+                    <TextBlock Classes="b1" Text="Some File Visuals"
+                                Margin="8, 4"/>
+                </StackPanel>
         </Grid>
     
     <!-- End Grid -->
