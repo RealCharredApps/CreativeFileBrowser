@@ -77,7 +77,8 @@ namespace CreativeFileBrowser.ViewModels
                     {
                         Name = drive,
                         FullPath = drive,
-                        IsDirectory = true
+                        IsDirectory = true,
+                        IsExpanded = false,
                     };
 
                     RootItems.Add(driveItem);

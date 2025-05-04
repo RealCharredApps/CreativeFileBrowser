@@ -38,10 +38,80 @@
                 <Setter Property="FontSize" Value="8"/>
                 <Setter Property="Foreground" Value="White"/>
             </Style>
-            <Style Selector="TextBlock.b1">
+            <Style Selector="TextBlock.bp1">
                 <Setter Property="FontFamily" Value="Roboto"/>
                 <Setter Property="FontSize" Value="12"/>
                 <Setter Property="Foreground" Value="White"/>
+            </Style>
+            <Style Selector="TextBlock.bp2">
+                <Setter Property="FontFamily" Value="Roboto"/>
+                <Setter Property="FontSize" Value="10"/>
+                <Setter Property="Foreground" Value="White"/>
+            </Style>
+            <Style Selector="TextBlock.bp3">
+                <Setter Property="FontFamily" Value="Roboto"/>
+                <Setter Property="FontSize" Value="8"/>
+                <Setter Property="Foreground" Value="#A8A9A9"/>
+            </Style>
+            <Style Selector="TextBox.clickToCopyPath">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderBrush" Value="Transparent"/>
+                <Setter Property="IsReadOnly" Value="True"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                
+                <Style Selector="^:focus">
+                    <Setter Property="Background" Value="Transparent"/>
+                </Style>
+                
+                <Style Selector="^:pointerover">
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="Foreground" Value="#CCCCCC"/>
+                </Style>
+
+                <Style Selector="^:pressed">
+                    <Setter Property="Background" Value="Transparent"/>
+                </Style>
+            </Style>
+            <Style Selector="TextBox.pathDisplay">
+                <Setter Property="FontFamily" Value="Roboto"/>
+                <Setter Property="FontSize" Value="8"/>
+                <Setter Property="Foreground" Value="#A8A9A9"/>
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Padding" Value="4,2"/>
+                <Setter Property="IsReadOnly" Value="True"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="CaretBrush" Value="Transparent"/>
+                
+                <!-- Override all possible states to ensure transparency -->
+                <Style Selector="^:pointerover">
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="Foreground" Value="#FFFFFF"/>
+                </Style>
+                
+                <Style Selector="^:focus">
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="BorderThickness" Value="0"/>
+                </Style>
+                
+                <Style Selector="^:pressed">
+                    <Setter Property="Background" Value="Transparent"/>
+                </Style>
+            </Style>
+            <Style Selector="TextBox.tbp1">
+                <Setter Property="FontFamily" Value="Roboto"/>
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="Foreground" Value="White"/>
+            </Style>
+            <Style Selector="TextBox.tbp2">
+                <Setter Property="FontFamily" Value="Roboto"/>
+                <Setter Property="FontSize" Value="10"/>
+                <Setter Property="Foreground" Value="White"/>
+            </Style>
+            <Style Selector="TextBox.tbp3">
+                <Setter Property="FontFamily" Value="Roboto"/>
+                <Setter Property="FontSize" Value="8"/>
+                <Setter Property="Foreground" Value="#A8A9A9"/>
             </Style>
             <Style Selector="Label.p1">
                 <Setter Property="FontFamily" Value="Roboto"/>
@@ -284,14 +354,14 @@
                 Grid.ColumnDefinitions="Auto, Auto, *">
             <!-- Gallery View Right - Left-Center Column -->
                 <StackPanel Grid.Column="0" >
-                    <TextBlock Classes="l2" Text="Binding View x2"
+                    <TextBlock Classes="bp2" Text="Binding View x2"
                             HorizontalAlignment="Left" VerticalAlignment="Center" 
                             Margin="8"></TextBlock>
                     <StackPanel Orientation="Horizontal" 
                             HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0, 0, 0, 4">
                         <Button Command="" Classes="b4" Margin="0, 0, 4, 0"
                                 VerticalAlignment="Center"
-                                Width="16" Height="16" CornerRadius="50">
+                                Width="12" Height="12" CornerRadius="50">
                             <Label Classes="bt2" FontSize="4"
                                     VerticalAlignment="Center">—</Label>
                         </Button>
@@ -299,39 +369,51 @@
                                     FontSize="8" 
                                     VerticalAlignment="Center"/>
                     </StackPanel>
-                    <!-- Spacer 
-                    <Rectangle Fill="#292D2E" Height="1" Margin="0, 0, 0, 8"></Rectangle>
-                    -->
+                    <StackPanel Orientation="Horizontal" 
+                            HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0, 0, 0, 4">
+                        <Button Command="" Classes="b3" Margin="0, 0, 4, 0"
+                                VerticalAlignment="Center"
+                                Width="12" Height="12" CornerRadius="50">
+                            <Label Classes="bt2" FontSize="4"
+                                    VerticalAlignment="Center">—</Label>
+                        </Button>
+                        <TextBlock Classes="l1" Text="Create Folder"
+                                    FontSize="8" 
+                                    VerticalAlignment="Center"/>
+                    </StackPanel>
                     <!-- Spacer -->
                     <Rectangle Fill="#292D2E" Height="1" Margin="0, 0, 0, 8"></Rectangle>
-                    <Button Command="" Classes="b0">
-                        <Label Classes="lb1" >C Drive</Label>
-                    </Button>
 
                     <!-- File tree view -->
-                    <TreeView Grid.Column="0" 
-                            ItemsSource="{Binding FileExplorer.RootItems}"
-                            SelectedItem="{Binding FileExplorer.SelectedItem}">
-                        <TreeView.ItemTemplate>
-                            <TreeDataTemplate ItemsSource="{Binding Children}">
-                                <StackPanel Orientation="Horizontal" 
-                                            Spacing="5"
-                                            DoubleTapped="OnItemDoubleTapped">
-                                    <Image Width="16" Height="16">
-                                        <Image.Source>
-                                            <DrawingImage>
-                                                <DrawingImage.Drawing>
-                                                    <GeometryDrawing Brush="{Binding IsDirectory, Converter={StaticResource FolderIconConverter}}"
-                                                                    Geometry="M 0,0 L 16,0 16,16 0,16 Z" />
-                                                </DrawingImage.Drawing>
-                                            </DrawingImage>
-                                        </Image.Source>
-                                    </Image>
-                                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
-                                </StackPanel>
-                            </TreeDataTemplate>
-                        </TreeView.ItemTemplate>
-                    </TreeView>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                        HorizontalScrollBarVisibility="Auto"
+                        Width="150" MaxHeight="350" HorizontalAlignment="Left"
+                        Grid.Column="0" >
+                        <TreeView Grid.Column="0" 
+                                ItemsSource="{Binding FileExplorer.RootItems}"
+                                SelectedItem="{Binding FileExplorer.SelectedItem}">
+                            <TreeView.ItemTemplate>
+                                <TreeDataTemplate ItemsSource="{Binding Children}">
+                                    <StackPanel Orientation="Horizontal" Margin="-30, 0"
+                                                Spacing="5"
+                                                DoubleTapped="OnItemDoubleTapped">
+                                        <Image Width="8" Height="8" HorizontalAlignment="Left"
+                                                VerticalAlignment="Center">                                            <Image.Source>
+                                                <DrawingImage>
+                                                    <DrawingImage.Drawing>
+                                                        <GeometryDrawing Brush="{Binding IsDirectory, Converter={StaticResource FolderIconConverter}}"
+                                                                        Geometry="M 0,0 L 12,0 12,12 0,12 Z" />
+                                                    </DrawingImage.Drawing>
+                                                </DrawingImage>
+                                            </Image.Source>
+                                        </Image>
+                                        <TextBlock Text="{Binding Name}" Classes="bp2"
+                                                    HorizontalAlignment="Left" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </TreeDataTemplate>
+                            </TreeView.ItemTemplate>
+                        </TreeView>
+                    </ScrollViewer>
                 </StackPanel>
             <!-- Column Divider -->
                 <Rectangle Fill="#292D2E" Grid.Column="1" Grid.Row="4" Width="1"></Rectangle>
@@ -342,18 +424,39 @@
                             Margin="12, 4"></TextBlock>
                     <!-- Spacer -->
                     <Rectangle Fill="#292D2E" Height="1" Margin="0"></Rectangle>
-                    <TextBlock Classes="l3" Text="Filepath/StrungOut?Here/Shown/Copy-able.filetype"
-                            HorizontalAlignment="Left" VerticalAlignment="Center" 
-                            Margin="12, 4"></TextBlock>
+                    <!-- File Path -->
+                        <TextBox x:Name="PathTextBox" 
+                            Classes="tbp3"
+                            Text="{Binding FileExplorer.CurrentPath}"
+                            HorizontalAlignment="Left" 
+                            VerticalAlignment="Center" 
+                            Margin="12,4"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            IsReadOnly="True"
+                            Cursor="Hand"
+                            ToolTip.Tip="Click to copy path"
+                            Tapped="OnPathTextBoxTapped"/>
+                        <!-- Success notification that appears on copy -->
+                        <Border x:Name="CopyNotification" 
+                                Background="#162A23" 
+                                BorderBrush="#4DCEA3" 
+                                BorderThickness="1"
+                                CornerRadius="3"
+                                Padding="6,2"
+                                Margin="12,24,0,0"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Top"
+                                IsVisible="False">
+                            <TextBlock Text="✓ Path copied" 
+                                    Foreground="#4DCEA3" 
+                                    FontSize="9"/>
+                        </Border>
                     <!-- Spacer -->
                     <Rectangle Fill="#292D2E" Height="1" Margin="0, 0, 0, 8"></Rectangle>
                     <!-- Content/preview pane -->
                         <Grid Grid.Column="1" RowDefinitions="Auto,*">
                             <!-- Path navigation bar -->
-                            <TextBox Grid.Row="0" 
-                                    Text="{Binding FileExplorer.CurrentPath}" 
-                                    Margin="5" 
-                                    IsReadOnly="True"/>
                             
                             <!-- File preview area -->
                             <Border Grid.Row="1" 
