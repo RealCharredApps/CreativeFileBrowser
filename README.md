@@ -2,14 +2,23 @@ Cross-Platform version of app — Coming Soon.
 
 **Preview of Avalonia UI in Progress**
 (updated 5/3/25)
-<img width="576" alt="Screenshot 2025-05-03 at 5 53 13 PM" src="https://github.com/user-attachments/assets/5c7b0e21-a9c1-490f-9f00-fb0017886214" />
+<img width="727" alt="Screenshot 2025-05-03 at 8 47 59 PM" src="https://github.com/user-attachments/assets/b0e0380d-175b-4b1f-8691-f4377b677912" />
 
 
 **Progress Doc**
 Following MVVM Architectural Model
-1. Building UI View — In Prog 📋
-   - Hicks Law, simple + similar to current ai platform, consistency in design
+1. Building UI View — In Prog ~ 75% there 📋
+   - Hicks Law, simple + similar to current ai platforms, consistency in design/colors
+   - NEEDS clarity in use case for adding monitored folders & how they add to current workspace
+
 3. Connecting View Model/Controllers — In Prog ⌨️ 💬
-   - Pending: update center with system file treeview vs default/loaded monitored folders list view
+   - Pending: Left side
+        - Sys/Mon to update center column view
+        - + Buttons to add mon/workspace
+        - Workspaces list to be scrollable - to update with real list from json
+        - Add hover options - like remove workspace / remove mon folder
+   - Pending: update center with system file treeview as default vs loaded monitored folders list view
    - Pending: update right view with file type thumbnails recursively
-4. Link JSON/Settings/Data/Backend/Security Protocols — TBD
+        - include filepath, search, filters, etc. there
+
+5. Link Models/JSON/Settings/Data/Backend/Security Protocols — TBD
