@@ -13,6 +13,7 @@ Following MVVM Architectural Model
    - Needs to adjust based on security exclusions model
 
 3. Connecting View Model/Controllers — In Prog ⌨️ 💬
+   - Center Column: System File Treeview - can view any storage drive connected with permission (usb, cloud, local)
    - Pending: Left side
         - Sys/Mon to update center column view
         - + Buttons to add mon/workspace
