@@ -5,6 +5,7 @@ using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CreativeFileBrowser.Models;
+using CreativeFileBrowser.ViewModels;
 
 namespace CreativeFileBrowser.ViewModels
 {
@@ -13,7 +14,12 @@ namespace CreativeFileBrowser.ViewModels
         private ObservableCollection<FileSystemItem> _rootItems = new();
         private FileSystemItem? _selectedItem;
         private string _currentPath = string.Empty;
-        private object _filePreview = string.Empty;
+        //private object _filePreview = string.Empty;
+        private FilePreviewViewModel? _filePreviewViewModel;
+        public FilePreviewViewModel FilePreviewViewModel
+        {
+            get => _filePreviewViewModel ??= new FilePreviewViewModel();
+        }
 
         // Collection of root drives/directories
         public ObservableCollection<FileSystemItem> RootItems
@@ -41,13 +47,6 @@ namespace CreativeFileBrowser.ViewModels
         {
             get => _currentPath;
             set => SetProperty(ref _currentPath, value);
-        }
-
-        // Preview of selected file
-        public object FilePreview
-        {
-            get => _filePreview;
-            set => SetProperty(ref _filePreview, value);
         }
 
         // Command to load drives
@@ -159,14 +158,14 @@ namespace CreativeFileBrowser.ViewModels
             {
                 try
                 {
-                    var dirInfo = new DirectoryInfo(item.FullPath);
                     int fileCount = Directory.GetFiles(item.FullPath).Length;
                     int dirCount = Directory.GetDirectories(item.FullPath).Length;
-                    FilePreview = $"{dirCount} directories, {fileCount} files";
+                    FilePreviewViewModel.PreviewContent = $"{dirCount} directories, {fileCount} files";
+                    _ = FilePreviewViewModel.LoadFolderContentsAsync(item.FullPath);
                 }
                 catch
                 {
-                    FilePreview = "Access denied";
+                    FilePreviewViewModel.PreviewContent = "Access denied";
                 }
                 return;
             }
@@ -174,45 +173,12 @@ namespace CreativeFileBrowser.ViewModels
             // For files, show basic file info and try to generate a preview
             try
             {
-                var fileInfo = new FileInfo(item.FullPath);
-                string extension = fileInfo.Extension.ToLower();
-
-                // Simple preview based on file type
-                switch (extension)
-                {
-                    case ".txt":
-                    case ".log":
-                    case ".cs":
-                    case ".xml":
-                    case ".json":
-                        // For text files, show first few lines
-                        using (var reader = new StreamReader(item.FullPath))
-                        {
-                            string preview = "";
-                            for (int i = 0; i < 10 && !reader.EndOfStream; i++)
-                                preview += reader.ReadLine() + Environment.NewLine;
-
-                            FilePreview = preview;
-                        }
-                        break;
-
-                    case ".jpg":
-                    case ".jpeg":
-                    case ".png":
-                    case ".bmp":
-                        // For images, we'd ideally load a thumbnail
-                        FilePreview = "Image file: " + fileInfo.Length / 1024 + " KB";
-                        break;
-
-                    default:
-                        // For other files, just show info
-                        FilePreview = $"File size: {fileInfo.Length / 1024} KB\nLast modified: {fileInfo.LastWriteTime}";
-                        break;
-                }
+                // Just set the FilePath, the FilePreviewViewModel will handle the rest
+                FilePreviewViewModel.FilePath = item.FullPath;
             }
-            catch
+            catch (Exception ex)
             {
-                FilePreview = "Unable to generate preview";
+                FilePreviewViewModel.PreviewContent = $"Unable to generate preview: {ex.Message}";
             }
         }
     }

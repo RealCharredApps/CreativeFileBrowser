@@ -29,5 +29,8 @@ build_property.EnableCodeStyleSeverity =
 [/Library/CodeProjects/CreativeFileBrowser_Scratch_Avalonia/CreativeFileBrowser/App.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 
+[/Library/CodeProjects/CreativeFileBrowser_Scratch_Avalonia/CreativeFileBrowser/Views/FilePreviewView.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
 [/Library/CodeProjects/CreativeFileBrowser_Scratch_Avalonia/CreativeFileBrowser/Views/MainWindow.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml

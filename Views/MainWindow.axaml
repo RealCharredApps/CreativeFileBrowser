@@ -494,21 +494,21 @@
                         </StackPanel>
                     <!-- Spacer -->
                     <Rectangle Fill="#292D2E" Height="1" Margin="0, 0, 0, 8"></Rectangle>
-                    <TextBlock Classes="bp2" Text="Search - Refresh - Filters"
+                    <!-- Textbox search bar - ftr:refresh btn - filters btn -->
+                    <TextBlock Classes="bp2" Text="Search - Filters"
                             HorizontalAlignment="Right" VerticalAlignment="Top" 
                             Margin="8, 0, 8, 8"></TextBlock>
+                    
                     <!-- Spacer -->
                     <Rectangle Fill="Transparent" Height="1" Margin="0"></Rectangle>
                     <!-- Content/preview pane -->
-                        <Grid Grid.Column="1" RowDefinitions="Auto,*">
-                            <!-- Path navigation bar -->
-                            
+                        <Grid Grid.Column="1" RowDefinitions="Auto,*">                            
                             <!-- File preview area -->
                             <Border Grid.Row="1" 
                                     BorderBrush="Transparent" 
                                     BorderThickness="0" 
                                     Margin="4">
-                                <ContentControl Content="{Binding FileExplorer.FilePreview}"
+                                <ContentControl Content="{Binding FileExplorer.FilePreviewViewModel}"
                                                 Classes="ccp1"
                                                 Margin="4"/>
                             </Border>

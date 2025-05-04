@@ -15,7 +15,7 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         // Connecting the ViewModel with Code-Behind
-        DataContext = new FileExplorerViewModel();
+        DataContext = new MainViewModel();
     }
 
     // Handle double-click on items to expand directories

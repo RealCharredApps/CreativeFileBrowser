@@ -1,0 +1,53 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:CreativeFileBrowser.ViewModels"
+             mc:Ignorable="d"
+             x:DataType="vm:FilePreviewViewModel"
+             x:Class="CreativeFileBrowser.Views.FilePreviewView">
+    
+    <Grid RowDefinitions="*,Auto">
+        <!-- Preview content area -->
+        <ContentControl Grid.Row="0" 
+                        Content="{Binding PreviewContent}"
+                        HorizontalAlignment="Stretch" 
+                        VerticalAlignment="Stretch"
+                        Margin="4"/>
+        
+        <!-- Gallery view (only visible for image folders) -->
+        <ScrollViewer Grid.Row="1" 
+                      HorizontalScrollBarVisibility="Auto"
+                      IsVisible="{Binding IsGalleryView}">
+            <!-- Use ItemsControl instead of ItemsRepeater for better compatibility -->
+            <ItemsControl ItemsSource="{Binding ImageGallery}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" Spacing="8"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:ImageItem">
+                        <Border Margin="4" 
+                                Padding="2"
+                                BorderBrush="Gray" 
+                                BorderThickness="1"
+                                CornerRadius="3"
+                                PointerPressed="OnGalleryItemPressed">
+                            <StackPanel Spacing="4">
+                                <Image Source="{Binding Thumbnail}"
+                                       Width="100" 
+                                       Height="100" 
+                                       Stretch="Uniform"/>
+                                <TextBlock Text="{Binding FileName}"
+                                           HorizontalAlignment="Center"
+                                           TextWrapping="Wrap"
+                                           MaxWidth="100"/>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</UserControl>
