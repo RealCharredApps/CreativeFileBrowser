@@ -267,6 +267,7 @@
 
     <Window.Resources>
         <converters:FolderIconConverter x:Key="FolderIconConverter"/>
+        <converters:DriveIconConverter x:Key="DriveIconConverter"/>
     </Window.Resources>
    
     <Grid>
@@ -288,12 +289,17 @@
                 Margin="12, 4">      
                 <TextBlock Classes="h1" Text="Binding CurrentViewName" Grid.Column="0"
                             HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                <Button Command="" Grid.Column="2" Classes="b2"
-                        HorizontalAlignment="Right" VerticalAlignment="Center"
-                        Width="24" Height="24">
-                    <Label Classes="bt1" HorizontalAlignment="Center" 
-                            VerticalAlignment="Center" FontSize="12">+</Label>
-                </Button>
+                <StackPanel Grid.Column="2" Classes="b2"
+                            VerticalAlignment="Center" Orientation="Horizontal" 
+                            HorizontalAlignment="Right" Margin="8, 0, 8, 4">
+                        <ToggleSwitch Command="" Classes="l1" Margin="0"
+                                VerticalAlignment="Center" FontSize="8"
+                                Foreground="#F7F7F7" >
+                        </ToggleSwitch>
+                        <TextBlock Classes="l1" Text=": Recursive Search"
+                                    FontSize="8" 
+                                    VerticalAlignment="Center"/>
+                    </StackPanel>
         </Grid>
         <!-- Workspace Divider -->
         <Rectangle Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="2"
@@ -315,23 +321,38 @@
                 </Button>
                 <!-- Spacer -->
                 <Rectangle Fill="#292D2E" Height="1" Margin="0, 0, 0, 8"></Rectangle>
-                <StackPanel Orientation="Horizontal" 
-                            HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0, 0, 0, 4">
-                    <Button Command="" Classes="b2" Margin="0, 0, 4, 0"
-                            Width="24" Height="24">
-                        <Label Classes="bt2">+</Label>
+                <StackPanel Orientation="Vertical" 
+                            HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0, 0, 0, 4">
+                    <Button Command="" Classes="b2" Margin="0, 0, 0, 4"
+                            Width="22" Height="22"
+                            HorizontalAlignment="Center">
+                        <Label Classes="bt3">+</Label>
                     </Button>
-                    <TextBlock Classes="l1" Text="Monitor Folder"
-                                VerticalAlignment="Center"/>
+                    <TextBlock Classes="l2" Text="Monitor Folder"
+                                HorizontalAlignment="Center" VerticalAlignment="Center" 
+                                Margin="0"/>
                 </StackPanel>
-                <StackPanel Orientation="Horizontal" Margin="0, 0, 0, 4" 
-                            HorizontalAlignment="Left" VerticalAlignment="Center">
-                    <Button Command="" Classes="b4" Margin="0, 0, 4, 0"
-                            Width="24" Height="24">
-                        <Label Classes="bt2">+</Label>
+                <StackPanel Orientation="Vertical" Margin="0, 0, 0, 4" 
+                            HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Button Command="" Classes="b3" Margin="0, 0, 0, 4"
+                            Width="22" Height="22"
+                            HorizontalAlignment="Center">
+                        <Label Classes="bt3">+</Label>
                     </Button>
-                    <TextBlock Classes="l1" Text="New Workspace"
-                                VerticalAlignment="Center"/>
+                    <TextBlock Classes="l2" Text="Add New Folder"
+                                HorizontalAlignment="Center" VerticalAlignment="Center" 
+                                Margin="0"/>
+                </StackPanel>
+                <StackPanel Orientation="Vertical" Margin="0, 0, 0, 4" 
+                            HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Button Command="" Classes="b4" Margin="0, 0, 0, 4"
+                            Width="22" Height="22"
+                            HorizontalAlignment="Center">
+                        <Label Classes="bt3">+</Label>
+                    </Button>
+                    <TextBlock Classes="l2" Text="New Workspace"
+                                HorizontalAlignment="Center" VerticalAlignment="Center" 
+                                Margin="0"/>
                 </StackPanel>
                 <!-- Spacer -->
                 <Rectangle Fill="#292D2E" Height="1" Margin="0, 0, 0, 8"></Rectangle>
@@ -367,25 +388,71 @@
         <Rectangle Grid.Column="4" Grid.Row="4" Fill="#1F1F1F"></Rectangle>
         <Grid Grid.Column="4" Grid.Row="4" 
                 Grid.ColumnDefinitions="Auto, Auto, *">
-            <!-- Gallery View Right - Left-Center Column -->
+            <!-- Gallery View - Center Column -->
                 <StackPanel Grid.Column="0" >
-                    <TextBlock Classes="bp2" Text="Binding View x2"
-                            HorizontalAlignment="Left" VerticalAlignment="Center" 
-                            Margin="8"></TextBlock>
-                    <StackPanel Orientation="Horizontal" 
-                            HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0, 0, 0, 4">
-                        <Button Command="" Classes="b4" Margin="0, 0, 4, 0"
-                                VerticalAlignment="Center"
-                                Width="12" Height="12" CornerRadius="50">
-                            <Label Classes="bt2" FontSize="4"
-                                    VerticalAlignment="Center">—</Label>
-                        </Button>
-                        <TextBlock Classes="l1" Text="Toggle Recursive"
-                                    FontSize="8" 
-                                    VerticalAlignment="Center"/>
+                    <!-- File Path -->
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Left"
+                                Margin="8, 4, 8, 0" MaxWidth="200">
+                        <StackPanel Orientation="Horizontal" Height="16">
+                            <TextBlock Classes="bp2" Text="Current Path:" 
+                                        FontWeight="Bold"
+                                        HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                            <!-- Success notification that appears on copy -->
+                            <Border x:Name="CopyNotification" 
+                                    Background="#162A23" 
+                                    BorderBrush="#4DCEA3" 
+                                    BorderThickness="1"
+                                    CornerRadius="3"
+                                    Padding="4, 2"
+                                    Margin="4, 0"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    IsVisible="False">
+                                <TextBlock Text="✓ Path copied" 
+                                        Foreground="#4DCEA3" 
+                                        FontSize="9"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"/>
+                            </Border>
+                            <TextBox x:Name="PathTextBox" 
+                                Classes="tbp2"
+                                Text="{Binding FileExplorer.CurrentPath}"
+                                HorizontalAlignment="Left" 
+                                VerticalAlignment="Top" 
+                                Padding="0"
+                                Margin="4, 0"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                IsReadOnly="True"
+                                Cursor="Hand"
+                                ToolTip.Tip="Click to copy path"
+                                Tapped="OnPathTextBoxTapped">
+                                <!-- Override internal style to eliminate all backgrounds -->
+                                <TextBox.Styles>
+                                    <Style Selector="TextBox">
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Setter Property="BorderThickness" Value="0"/>
+                                    </Style>
+                                    <Style Selector="TextBox:pointerover /template/ Border#PART_BorderElement">
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Setter Property="BorderThickness" Value="0"/>
+                                    </Style>
+                                    <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Setter Property="BorderThickness" Value="0"/>
+                                    </Style>
+                                    <Style Selector="TextBox:pointerover">
+                                        <Setter Property="Foreground" Value="#CCCCCC"/>
+                                    </Style>
+                                </TextBox.Styles>
+                            </TextBox>
+                        </StackPanel>
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal" 
-                            HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0, 0, 0, 4">
+                    <!-- Spacer -->
+                    <Rectangle Fill="#292D2E" Height="1" Margin="0, 0, 0, 4"></Rectangle>
+                    <!--
+                    <StackPanel VerticalAlignment="Center" Orientation="Horizontal" 
+                            HorizontalAlignment="Left" Margin="8, 0, 8, 4">
                         <Button Command="" Classes="b3" Margin="0, 0, 4, 0"
                                 VerticalAlignment="Center"
                                 Width="12" Height="12" CornerRadius="50">
@@ -396,13 +463,12 @@
                                     FontSize="8" 
                                     VerticalAlignment="Center"/>
                     </StackPanel>
-                    <!-- Spacer -->
-                    <Rectangle Fill="#292D2E" Height="1" Margin="0, 0, 0, 8"></Rectangle>
-
+                    -->
+                    
                     <!-- File tree view -->
                     <ScrollViewer VerticalScrollBarVisibility="Auto"
                         HorizontalScrollBarVisibility="Auto"
-                        Width="150" MaxHeight="350" HorizontalAlignment="Left"
+                        Width="200" MaxHeight="350" HorizontalAlignment="Left"
                         Grid.Column="0" >
                         <TreeView Grid.Column="0" 
                                 ItemsSource="{Binding FileExplorer.RootItems}"
@@ -413,17 +479,29 @@
                                                 Spacing="5"
                                                 DoubleTapped="OnItemDoubleTapped">
                                         <Image Width="8" Height="8" HorizontalAlignment="Left"
-                                                VerticalAlignment="Center">                                            <Image.Source>
+                                                VerticalAlignment="Center">
+                                            <Image.Source>
                                                 <DrawingImage>
                                                     <DrawingImage.Drawing>
-                                                        <GeometryDrawing Brush="{Binding IsDirectory, Converter={StaticResource FolderIconConverter}}"
-                                                                        Geometry="M 0,0 L 12,0 12,12 0,12 Z" />
+                                                        <GeometryDrawing>
+                                                            <GeometryDrawing.Brush>
+                                                                <MultiBinding Converter="{StaticResource DriveIconConverter}">
+                                                                    <Binding Path="DriveType" />
+                                                                    <Binding Path="IsDirectory" />
+                                                                </MultiBinding>
+                                                            </GeometryDrawing.Brush>
+                                                            <GeometryDrawing.Geometry>
+                                                                <RectangleGeometry Rect="0,0,12,12" />
+                                                            </GeometryDrawing.Geometry>
+                                                        </GeometryDrawing>
                                                     </DrawingImage.Drawing>
                                                 </DrawingImage>
                                             </Image.Source>
                                         </Image>
                                         <TextBlock Text="{Binding Name}" Classes="bp2"
-                                                    HorizontalAlignment="Left" VerticalAlignment="Center" />
+                                                HorizontalAlignment="Left" VerticalAlignment="Center" 
+                                                Cursor="Hand">
+                                        </TextBlock>
                                     </StackPanel>
                                 </TreeDataTemplate>
                             </TreeView.ItemTemplate>
@@ -434,70 +512,10 @@
                 <Rectangle Fill="#292D2E" Grid.Column="1" Grid.Row="4" Width="1"></Rectangle>
             <!-- Gallery Right -->
                 <StackPanel Grid.Column="2" >
-                    <!-- File Path -->
-                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Left"
-                                    Margin="8, 4, 8, 4">
-                            <StackPanel Orientation="Horizontal" Height="16">
-                                <TextBlock Classes="bp2" Text="Current Path:" 
-                                            FontWeight="Bold"
-                                            HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                                <!-- Success notification that appears on copy -->
-                                <Border x:Name="CopyNotification" 
-                                        Background="#162A23" 
-                                        BorderBrush="#4DCEA3" 
-                                        BorderThickness="1"
-                                        CornerRadius="3"
-                                        Padding="4, 2"
-                                        Margin="4, 0"
-                                        HorizontalAlignment="Left"
-                                        VerticalAlignment="Center"
-                                        IsVisible="False">
-                                    <TextBlock Text="✓ Path copied" 
-                                            Foreground="#4DCEA3" 
-                                            FontSize="9"
-                                            HorizontalAlignment="Center"
-                                            VerticalAlignment="Center"/>
-                                </Border>
-                                <TextBox x:Name="PathTextBox" 
-                                    Classes="tbp2"
-                                    Text="{Binding FileExplorer.CurrentPath}"
-                                    HorizontalAlignment="Left" 
-                                    VerticalAlignment="Top" 
-                                    Padding="0"
-                                    Margin="4, 0"
-                                    Background="Transparent"
-                                    BorderThickness="0"
-                                    IsReadOnly="True"
-                                    Cursor="Hand"
-                                    ToolTip.Tip="Click to copy path"
-                                    Tapped="OnPathTextBoxTapped">
-                                    <!-- Override internal style to eliminate all backgrounds -->
-                                    <TextBox.Styles>
-                                        <Style Selector="TextBox">
-                                            <Setter Property="Background" Value="Transparent"/>
-                                            <Setter Property="BorderThickness" Value="0"/>
-                                        </Style>
-                                        <Style Selector="TextBox:pointerover /template/ Border#PART_BorderElement">
-                                            <Setter Property="Background" Value="Transparent"/>
-                                            <Setter Property="BorderThickness" Value="0"/>
-                                        </Style>
-                                        <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
-                                            <Setter Property="Background" Value="Transparent"/>
-                                            <Setter Property="BorderThickness" Value="0"/>
-                                        </Style>
-                                        <Style Selector="TextBox:pointerover">
-                                            <Setter Property="Foreground" Value="#CCCCCC"/>
-                                        </Style>
-                                    </TextBox.Styles>
-                                </TextBox>
-                            </StackPanel>
-                        </StackPanel>
-                    <!-- Spacer -->
-                    <Rectangle Fill="#292D2E" Height="1" Margin="0, 0, 0, 8"></Rectangle>
                     <!-- Textbox search bar - ftr:refresh btn - filters btn -->
                     <TextBlock Classes="bp2" Text="Search - Filters"
-                            HorizontalAlignment="Right" VerticalAlignment="Top" 
-                            Margin="8, 0, 8, 8"></TextBlock>
+                            HorizontalAlignment="Right" VerticalAlignment="Center" 
+                            Margin="8" Foreground="Gray"></TextBlock>
                     
                     <!-- Spacer -->
                     <Rectangle Fill="Transparent" Height="1" Margin="0"></Rectangle>

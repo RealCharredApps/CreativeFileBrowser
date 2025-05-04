@@ -1,8 +1,10 @@
-// FolderIconConverter.cs in CreativeFileBrowser.Converters namespace
-using Avalonia.Data.Converters;
-using Avalonia.Media;
 using System;
 using System.Globalization;
+using Avalonia.Data.Converters;
+using Avalonia.Media;
+using CreativeFileBrowser.Models;
+using static CreativeFileBrowser.Models.FileSystemItem;
+
 
 namespace CreativeFileBrowser.Converters
 {
@@ -25,4 +27,5 @@ namespace CreativeFileBrowser.Converters
             throw new NotImplementedException();
         }
     }
+
 }
