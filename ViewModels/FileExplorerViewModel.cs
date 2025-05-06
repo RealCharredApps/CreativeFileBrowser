@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
@@ -18,6 +19,8 @@ namespace CreativeFileBrowser.ViewModels
         private FileSystemItem? _selectedItem;
         private string _currentPath = string.Empty;
         //private object _filePreview = string.Empty;
+        private readonly Stack<string> _backStack = new();
+        private readonly Stack<string> _forwardStack = new();
         private FilePreviewViewModel? _filePreviewViewModel;
         public FilePreviewViewModel FilePreviewViewModel
         {
@@ -45,7 +48,22 @@ namespace CreativeFileBrowser.ViewModels
             {
                 if (SetProperty(ref _selectedItem, value) && value != null)
                 {
+                    // Save previous location to back stack (if different)
+                    if (!string.IsNullOrEmpty(CurrentPath) &&
+                        !CurrentPath.Equals(value.FullPath, StringComparison.OrdinalIgnoreCase))
+                    {
+                        _backStack.Push(CurrentPath);
+                        _forwardStack.Clear();
+
+                        // Update commands
+                        (NavigateBackCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                        (NavigateForwardCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    }
+
+                    // Update current path
                     CurrentPath = value.FullPath;
+
+                    // Update file preview
                     LoadPreview(value);
                 }
             }
@@ -61,6 +79,9 @@ namespace CreativeFileBrowser.ViewModels
         // Command to load drives
         public IRelayCommand LoadDrivesCommand { get; }
         public IRelayCommand CopySelectedPathCommand { get; }
+        public IRelayCommand NavigateBackCommand { get; }
+        public IRelayCommand NavigateForwardCommand { get; }
+        public IRelayCommand NavigateUpCommand { get; }
 
 
         // Command to expand a directory
@@ -71,6 +92,12 @@ namespace CreativeFileBrowser.ViewModels
             LoadDrivesCommand = new RelayCommand(LoadDrives);
             ExpandDirectoryCommand = new RelayCommand<FileSystemItem?>(ExpandDirectory);
             CopySelectedPathCommand = new RelayCommand(CopySelectedPath, CanCopySelectedPath);
+
+            // Navigation commands
+            NavigateBackCommand = new RelayCommand(NavigateBack, CanNavigateBack);
+            NavigateForwardCommand = new RelayCommand(NavigateForward, CanNavigateForward);
+            NavigateUpCommand = new RelayCommand(NavigateUp, CanNavigateUp);
+
             LoadDrives();
         }
 
@@ -103,17 +130,20 @@ namespace CreativeFileBrowser.ViewModels
         {
             if (OperatingSystem.IsMacOS())
             {
-                // Add main Macintosh HD drive
-                var macHD = new FileSystemItem
+                // Add main Macintosh HD drive only if not excluded
+                string macHDPath = "/";
+                if (!FolderExclusionRules.ShouldExcludeFolder("Macintosh HD", macHDPath))
                 {
-                    Name = "Macintosh HD",
-                    FullPath = "/",
-                    IsDirectory = true,
-                    IsExpanded = false
-                };
-                RootItems.Add(macHD);
-
-                PreloadSystemFolders(macHD);
+                    var macHD = new FileSystemItem
+                    {
+                        Name = "Macintosh HD",
+                        FullPath = macHDPath,
+                        IsDirectory = true,
+                        IsExpanded = false
+                    };
+                    RootItems.Add(macHD);
+                    PreloadSystemFolders(macHD);
+                }
             }
             else if (OperatingSystem.IsWindows())
             {
@@ -124,17 +154,21 @@ namespace CreativeFileBrowser.ViewModels
                         ? $"{drive.Name} (Local Disk)"
                         : $"{drive.Name} ({drive.VolumeLabel})";
 
-                    var driveItem = new FileSystemItem
+                    // Only add drives that aren't excluded
+                    if (!FolderExclusionRules.ShouldExcludeFolder(driveName, drive.Name))
                     {
-                        Name = driveName.TrimEnd('\\'),
-                        FullPath = drive.Name,
-                        IsDirectory = true,
-                        IsExpanded = false,
-                        DriveType = DriveTypeInfo.Fixed
-                    };
+                        var driveItem = new FileSystemItem
+                        {
+                            Name = driveName.TrimEnd('\\'),
+                            FullPath = drive.Name,
+                            IsDirectory = true,
+                            IsExpanded = false,
+                            DriveType = DriveTypeInfo.Fixed
+                        };
 
-                    RootItems.Add(driveItem);
-                    PreloadSystemFolders(driveItem);
+                        RootItems.Add(driveItem);
+                        PreloadSystemFolders(driveItem);
+                    }
                 }
             }
             else // Linux or other OS
@@ -590,5 +624,181 @@ namespace CreativeFileBrowser.ViewModels
                 Debug.WriteLine($"Error copying path: {ex.Message}");
             }
         }
+
+        // Navigation command handlers
+        private bool CanNavigateBack() => _backStack.Count > 0;
+        private bool CanNavigateForward() => _forwardStack.Count > 0;
+        private bool CanNavigateUp() => !string.IsNullOrEmpty(CurrentPath) &&
+            Directory.GetParent(CurrentPath) != null;
+
+        private void NavigateBack()
+        {
+            if (_backStack.Count > 0)
+            {
+                // Save current to forward stack
+                if (!string.IsNullOrEmpty(CurrentPath))
+                    _forwardStack.Push(CurrentPath);
+
+                // Navigate to previous
+                string previousPath = _backStack.Pop();
+                NavigateToPathWithoutHistory(previousPath);
+
+                // Update commands
+                (NavigateBackCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                (NavigateForwardCommand as RelayCommand)?.NotifyCanExecuteChanged();
+            }
+        }
+
+        private void NavigateForward()
+        {
+            if (_forwardStack.Count > 0)
+            {
+                // Save current to back stack
+                if (!string.IsNullOrEmpty(CurrentPath))
+                    _backStack.Push(CurrentPath);
+
+                // Navigate to next
+                string nextPath = _forwardStack.Pop();
+                NavigateToPathWithoutHistory(nextPath);
+
+                // Update commands
+                (NavigateBackCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                (NavigateForwardCommand as RelayCommand)?.NotifyCanExecuteChanged();
+            }
+        }
+
+        private void NavigateUp()
+        {
+            if (string.IsNullOrEmpty(CurrentPath))
+                return;
+
+            var parent = Directory.GetParent(CurrentPath);
+            if (parent != null)
+            {
+                // Save current for back navigation
+                _backStack.Push(CurrentPath);
+                _forwardStack.Clear();
+
+                // Navigate to parent
+                NavigateToPathWithoutHistory(parent.FullName);
+
+                // Update commands
+                (NavigateBackCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                (NavigateForwardCommand as RelayCommand)?.NotifyCanExecuteChanged();
+            }
+        }
+
+        // Helper method to navigate without affecting history
+        private void NavigateToPathWithoutHistory(string path)
+        {
+            if (!Directory.Exists(path))
+                return;
+
+            // Find or create the FileSystemItem for this path
+            FileSystemItem? targetItem = FindFileSystemItemByPath(path);
+
+            if (targetItem != null)
+            {
+                // Use existing item
+                SelectedItem = targetItem;
+                EnsureParentsExpanded(targetItem);
+            }
+            else
+            {
+                // Path not in current tree, must rebuild tree
+                CurrentPath = path;
+
+                // Create a temporary item to represent this location
+                var tempItem = new FileSystemItem
+                {
+                    Name = Path.GetFileName(path) ?? path,
+                    FullPath = path,
+                    IsDirectory = true
+                };
+
+                // Expand it to populate children
+                ExpandDirectory(tempItem);
+
+                // Update selected item
+                SelectedItem = tempItem;
+            }
+        }
+
+        // Helper to find a FileSystemItem by path in our tree
+        private FileSystemItem? FindFileSystemItemByPath(string path)
+        {
+            // Check each root item first
+            foreach (var rootItem in RootItems)
+            {
+                if (rootItem.FullPath.Equals(path, StringComparison.OrdinalIgnoreCase))
+                    return rootItem;
+
+                // Check children recursively
+                var item = FindFileSystemItemByPathRecursive(rootItem, path);
+                if (item != null)
+                    return item;
+            }
+
+            return null;
+        }
+
+        private FileSystemItem? FindFileSystemItemByPathRecursive(
+            FileSystemItem parent, string path)
+        {
+            foreach (var child in parent.Children)
+            {
+                if (child.FullPath.Equals(path, StringComparison.OrdinalIgnoreCase))
+                    return child;
+
+                if (child.IsDirectory)
+                {
+                    var item = FindFileSystemItemByPathRecursive(child, path);
+                    if (item != null)
+                        return item;
+                }
+            }
+
+            return null;
+        }
+
+        // Helper to ensure all parents of an item are expanded
+        private void EnsureParentsExpanded(FileSystemItem item)
+        {
+            string itemPath = item.FullPath;
+
+            foreach (var rootItem in RootItems)
+            {
+                if (itemPath.StartsWith(rootItem.FullPath, StringComparison.OrdinalIgnoreCase))
+                {
+                    rootItem.IsExpanded = true;
+                    EnsurePathExpanded(rootItem, itemPath);
+                    break;
+                }
+            }
+        }
+
+        private void EnsurePathExpanded(FileSystemItem parent, string targetPath)
+        {
+            foreach (var child in parent.Children)
+            {
+                if (!child.IsDirectory)
+                    continue;
+
+                if (targetPath.StartsWith(child.FullPath, StringComparison.OrdinalIgnoreCase))
+                {
+                    child.IsExpanded = true;
+
+                    // Make sure this item's children are loaded
+                    if (child.Children.Count == 0)
+                        ExpandDirectory(child);
+
+                    // Continue down the path
+                    EnsurePathExpanded(child, targetPath);
+                    break;
+                }
+            }
+        }
+
+
     }
 }

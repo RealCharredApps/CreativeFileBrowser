@@ -450,20 +450,35 @@
                     </StackPanel>
                     <!-- Spacer -->
                     <Rectangle Fill="#292D2E" Height="1" Margin="0, 0, 0, 4"></Rectangle>
-                    <!--
-                    <StackPanel VerticalAlignment="Center" Orientation="Horizontal" 
-                            HorizontalAlignment="Left" Margin="8, 0, 8, 4">
-                        <Button Command="" Classes="b3" Margin="0, 0, 4, 0"
-                                VerticalAlignment="Center"
-                                Width="12" Height="12" CornerRadius="50">
-                            <Label Classes="bt2" FontSize="4"
-                                    VerticalAlignment="Center">—</Label>
+                    <!-- Navigation Controls -->
+                    <StackPanel Orientation="Horizontal" 
+                                HorizontalAlignment="Left" VerticalAlignment="Center" 
+                                Margin="8, 4, 8, 4">
+                        <Button Command="{Binding FileExplorer.NavigateBackCommand}" 
+                                Classes="b3" Width="24" Height="24" 
+                                Margin="0, 0, 2, 0"
+                                ToolTip.Tip="Back">
+                            <Label Classes="bt2" FontSize="10">←</Label>
                         </Button>
-                        <TextBlock Classes="l1" Text="Create Folder"
-                                    FontSize="8" 
-                                    VerticalAlignment="Center"/>
+                        <Button Command="{Binding FileExplorer.NavigateForwardCommand}" 
+                                Classes="b3" Width="24" Height="24" 
+                                Margin="0, 0, 2, 0"
+                                ToolTip.Tip="Forward">
+                            <Label Classes="bt2" FontSize="10">→</Label>
+                        </Button>
+                        <Button Command="{Binding FileExplorer.NavigateUpCommand}" 
+                                Classes="b3" Width="24" Height="24" 
+                                Margin="0, 0, 2, 0"
+                                ToolTip.Tip="Up to parent folder">
+                            <Label Classes="bt2" FontSize="10">↑</Label>
+                        </Button>
+                        <Button Command="{Binding FileExplorer.CopySelectedPathCommand}" 
+                                Classes="b3" Width="24" Height="24" 
+                                Margin="0, 0, 2, 0"
+                                ToolTip.Tip="Copy Path">
+                            <Label Classes="bt2" FontSize="9">📋</Label>
+                        </Button>
                     </StackPanel>
-                    -->
                     
                     <!-- File tree view -->
                     <ScrollViewer VerticalScrollBarVisibility="Auto"
