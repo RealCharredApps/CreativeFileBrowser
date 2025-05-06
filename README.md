@@ -1,16 +1,18 @@
 Cross-Platform version of app — Coming Soon. 
 
 **Preview of Avalonia UI in Progress**
-(updated 5/4/25)
-<img width="760" alt="Screenshot 2025-05-04 at 5 07 39 PM" src="https://github.com/user-attachments/assets/f0d85a6e-9f85-4696-a963-ac2dcb85c467" />
+(updated 5/6/25)
+<img width="864" alt="Screenshot 2025-05-06 at 6 27 57 AM" src="https://github.com/user-attachments/assets/6b5e7acb-d456-471b-8e9e-8de953dc919e" />
+
 
 
 **Progress Doc**
 Following MVVM Architectural Model
 1. Building UI View — In Prog ~ 75% there 📋
+   - Added Community suggestion - basic filetree navigation
    - Needs minor adjustments
    - Needs gallery view and recursive toggle viewmodel to function
-   - Needs to adjust based on security exclusions model
+   - Basic model respects security exclusions model
 
 3. Connecting View Model/Controllers — In Prog ⌨️ 💬
    - Center Column: System File Treeview - can view any storage drive connected with permission (usb, cloud, local)
