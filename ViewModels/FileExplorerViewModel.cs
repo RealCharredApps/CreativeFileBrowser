@@ -98,6 +98,12 @@ namespace CreativeFileBrowser.ViewModels
             NavigateForwardCommand = new RelayCommand(NavigateForward, CanNavigateForward);
             NavigateUpCommand = new RelayCommand(NavigateUp, CanNavigateUp);
 
+            // Set up macOS-specific exclusions
+            if (OperatingSystem.IsMacOS())
+            {
+                AddMacOSSpecialFoldersExclusions();
+            }
+
             LoadDrives();
         }
 
@@ -118,6 +124,8 @@ namespace CreativeFileBrowser.ViewModels
 
                 // Add SharePoint connections if available
                 LoadSharePointConnections();
+
+                LoadPreview(SelectedItem);
             }
             catch (Exception ex)
             {
@@ -234,9 +242,17 @@ namespace CreativeFileBrowser.ViewModels
                             if (Path.GetFileName(volume) == "Macintosh HD")
                                 continue;
 
+                            String volName = Path.GetFileName(volume);
+                            // Skip excluded volumes like TimeMachine
+                            if (FolderExclusionRules.ShouldExcludeFolder(volName, volume))
+                            {
+                                System.Diagnostics.Debug.WriteLine($"Skipping excluded volume: {volume}");
+                                continue;
+                            }
+
                             var volumeItem = new FileSystemItem
                             {
-                                Name = Path.GetFileName(volume),
+                                Name = volName,
                                 FullPath = volume,
                                 IsDirectory = true,
                                 IsExpanded = false,
@@ -432,8 +448,29 @@ namespace CreativeFileBrowser.ViewModels
             if (directory == null || !directory.IsDirectory)
                 return;
 
+            Debug.WriteLine($"Expanding directory: {directory.FullPath}");
+
             try
             {
+                // Clear existing children
+                directory.Children.Clear();
+
+                // Skip expansion for excluded paths
+                if (FolderExclusionRules.ShouldExcludeFolder(
+                    Path.GetFileName(directory.FullPath), directory.FullPath))
+                {
+                    Debug.WriteLine($"Skipping expansion of excluded directory: {directory.FullPath}");
+                    directory.Children.Clear();
+                    directory.Children.Add(new FileSystemItem
+                    {
+                        Name = "Access Restricted - System Directory",
+                        FullPath = directory.FullPath,
+                        IsDirectory = false
+                    });
+                    directory.IsExpanded = true;
+                    return;
+                }
+
                 // Check if the drive is still accessible (important for removable and network drives)
                 if (directory.DriveType == DriveTypeInfo.Removable ||
                     directory.DriveType == DriveTypeInfo.Network ||
@@ -449,12 +486,10 @@ namespace CreativeFileBrowser.ViewModels
                             IsDirectory = false
                         });
                         directory.IsExpanded = true;
+                        Debug.WriteLine($"Expanding directory: {directory.FullPath}");
                         return;
                     }
                 }
-
-                // Clear existing children
-                directory.Children.Clear();
 
                 // Add directories
                 foreach (var dir in Directory.GetDirectories(directory.FullPath))
@@ -467,11 +502,17 @@ namespace CreativeFileBrowser.ViewModels
                         // Skip hidden directories on Mac/Linux 
                         if ((OperatingSystem.IsMacOS() || OperatingSystem.IsLinux()) &&
                             dirName.StartsWith("."))
+                        {
+                            Debug.WriteLine($"Checking directory: {dirName} at {dir}");
                             continue;
+                        }
 
                         // Skip excluded folders based on rules
                         if (FolderExclusionRules.ShouldExcludeFolder(dirName, dir))
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Skipping excluded folder: {dir}");
                             continue;
+                        }
 
                         directory.Children.Add(new FileSystemItem
                         {
@@ -592,6 +633,51 @@ namespace CreativeFileBrowser.ViewModels
             catch (Exception ex)
             {
                 FilePreviewViewModel.PreviewContent = $"Unable to generate preview: {ex.Message}";
+            }
+        }
+
+        // Add this specialized check for macOS volumes
+        private void AddMacOSSpecialFoldersExclusions()
+        {
+            // Specifically ensure System Volumes paths are excluded
+            try
+            {
+                if (Directory.Exists("/System/Volumes"))
+                {
+                    // Get all directories under /System/Volumes
+                    foreach (var dir in Directory.GetDirectories("/System/Volumes"))
+                    {
+                        // Check for Data/home and other special folders
+                        if (dir.Equals("/System/Volumes/Data", StringComparison.OrdinalIgnoreCase))
+                        {
+                            // Add Data folder and important subfolders to exclusions
+                            FolderExclusionRules.AddExactPathExclusion(dir);
+
+                            // Check if /System/Volumes/Data/home exists and add it
+                            string homePath = Path.Combine(dir, "home");
+                            if (Directory.Exists(homePath))
+                            {
+                                FolderExclusionRules.AddExactPathExclusion(homePath);
+                            }
+
+                            // Add other critical system paths
+                            string privatePath = Path.Combine(dir, "private");
+                            if (Directory.Exists(privatePath))
+                            {
+                                FolderExclusionRules.AddExactPathExclusion(privatePath);
+                            }
+                        }
+                        else
+                        {
+                            // Add other system volumes to exclusions
+                            FolderExclusionRules.AddExactPathExclusion(dir);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error setting up macOS special folder exclusions: {ex.Message}");
             }
         }
 
