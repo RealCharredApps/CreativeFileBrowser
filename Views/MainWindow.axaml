@@ -466,18 +466,14 @@
                                 ToolTip.Tip="Forward">
                             <Label Classes="bt2" FontSize="10">→</Label>
                         </Button>
+                        <!--
                         <Button Command="{Binding FileExplorer.NavigateUpCommand}" 
                                 Classes="b3" Width="24" Height="24" 
                                 Margin="0, 0, 2, 0"
                                 ToolTip.Tip="Up to parent folder">
                             <Label Classes="bt2" FontSize="10">↑</Label>
                         </Button>
-                        <Button Command="{Binding FileExplorer.CopySelectedPathCommand}" 
-                                Classes="b3" Width="24" Height="24" 
-                                Margin="0, 0, 2, 0"
-                                ToolTip.Tip="Copy Path">
-                            <Label Classes="bt2" FontSize="9">📋</Label>
-                        </Button>
+                        -->
                     </StackPanel>
                     
                     <!-- File tree view -->

@@ -27,6 +27,11 @@ namespace CreativeFileBrowser.ViewModels
             get => _filePreviewViewModel ??= new FilePreviewViewModel();
         }
         private bool _isCopySuccessful;
+        private const int HISTORY_CAPACITY = 30; // Maximum history entries
+        private readonly List<string> _navigationHistory = new List<string>(HISTORY_CAPACITY);
+        private int _currentHistoryIndex = -1;
+
+
         public bool IsCopySuccessful
         {
             get => _isCopySuccessful;
@@ -52,16 +57,19 @@ namespace CreativeFileBrowser.ViewModels
                     if (!string.IsNullOrEmpty(CurrentPath) &&
                         !CurrentPath.Equals(value.FullPath, StringComparison.OrdinalIgnoreCase))
                     {
-                        _backStack.Push(CurrentPath);
-                        _forwardStack.Clear();
+                        CurrentPath = value.FullPath;
+                        AddToHistory(value.FullPath);
+                        LoadPreview(value);
 
                         // Update commands
                         (NavigateBackCommand as RelayCommand)?.NotifyCanExecuteChanged();
                         (NavigateForwardCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                        (NavigateUpCommand as RelayCommand)?.NotifyCanExecuteChanged();
                     }
 
-                    // Update current path
                     CurrentPath = value.FullPath;
+
+                    AddToHistory(value.FullPath);
 
                     // Update file preview
                     LoadPreview(value);
@@ -79,6 +87,7 @@ namespace CreativeFileBrowser.ViewModels
         // Command to load drives
         public IRelayCommand LoadDrivesCommand { get; }
         public IRelayCommand CopySelectedPathCommand { get; }
+        // Navigation commands
         public IRelayCommand NavigateBackCommand { get; }
         public IRelayCommand NavigateForwardCommand { get; }
         public IRelayCommand NavigateUpCommand { get; }
@@ -604,7 +613,7 @@ namespace CreativeFileBrowser.ViewModels
         // Load a preview of the selected file
         private void LoadPreview(FileSystemItem item)
         {
-            if (item == null)
+            if (item == null || FilePreviewViewModel.FilePath == item.FullPath)
                 return;
 
             // For directories, show number of items
@@ -711,67 +720,84 @@ namespace CreativeFileBrowser.ViewModels
             }
         }
 
+
+        // Helper for adding to history
+        private void AddToHistory(string path)
+        {
+            // Skip if it's the same as current
+            if (_currentHistoryIndex >= 0 && _currentHistoryIndex < _navigationHistory.Count &&
+                _navigationHistory[_currentHistoryIndex] == path)
+                return;
+
+            // If we're not at the end of the history, remove everything after current position
+            if (_currentHistoryIndex >= 0 && _currentHistoryIndex < _navigationHistory.Count - 1)
+            {
+                _navigationHistory.RemoveRange(_currentHistoryIndex + 1,
+                    _navigationHistory.Count - _currentHistoryIndex - 1);
+            }
+
+            // Add new path
+            _navigationHistory.Add(path);
+
+            // Trim history if too large
+            if (_navigationHistory.Count > HISTORY_CAPACITY)
+            {
+                _navigationHistory.RemoveAt(0);
+            }
+
+            // Update index to point to the newly added item
+            _currentHistoryIndex = _navigationHistory.Count - 1;
+
+            // Update commands
+            (NavigateBackCommand as RelayCommand)?.NotifyCanExecuteChanged();
+            (NavigateForwardCommand as RelayCommand)?.NotifyCanExecuteChanged();
+        }
+
         // Navigation command handlers
-        private bool CanNavigateBack() => _backStack.Count > 0;
-        private bool CanNavigateForward() => _forwardStack.Count > 0;
-        private bool CanNavigateUp() => !string.IsNullOrEmpty(CurrentPath) &&
-            Directory.GetParent(CurrentPath) != null;
+        private bool CanNavigateBack() => _currentHistoryIndex > 0;
+        private bool CanNavigateForward() => _currentHistoryIndex < _navigationHistory.Count - 1;
+        private bool CanNavigateUp() => !string.IsNullOrEmpty(CurrentPath) && Directory.GetParent(CurrentPath) != null;
+
+        private void NavigateUp()
+        {
+            if (!CanNavigateUp())
+                return;
+
+            var parent = Directory.GetParent(CurrentPath);
+            if (parent == null)
+            {
+                Debug.WriteLine("Cannot navigate up, already at the root directory.");
+                return;
+            }
+
+            // Navigate to parent and add to history
+            string parentPath = parent.FullName;
+            AddToHistory(parentPath);
+            NavigateToPathWithoutHistory(parentPath);
+        }
 
         private void NavigateBack()
         {
-            if (_backStack.Count > 0)
-            {
-                // Save current to forward stack
-                if (!string.IsNullOrEmpty(CurrentPath))
-                    _forwardStack.Push(CurrentPath);
+            if (!CanNavigateBack())
+                return;
 
-                // Navigate to previous
-                string previousPath = _backStack.Pop();
-                NavigateToPathWithoutHistory(previousPath);
+            _currentHistoryIndex--;
+            NavigateToPathWithoutHistory(_navigationHistory[_currentHistoryIndex]);
 
-                // Update commands
-                (NavigateBackCommand as RelayCommand)?.NotifyCanExecuteChanged();
-                (NavigateForwardCommand as RelayCommand)?.NotifyCanExecuteChanged();
-            }
+            (NavigateBackCommand as RelayCommand)?.NotifyCanExecuteChanged();
+            (NavigateForwardCommand as RelayCommand)?.NotifyCanExecuteChanged();
         }
 
         private void NavigateForward()
         {
-            if (_forwardStack.Count > 0)
-            {
-                // Save current to back stack
-                if (!string.IsNullOrEmpty(CurrentPath))
-                    _backStack.Push(CurrentPath);
-
-                // Navigate to next
-                string nextPath = _forwardStack.Pop();
-                NavigateToPathWithoutHistory(nextPath);
-
-                // Update commands
-                (NavigateBackCommand as RelayCommand)?.NotifyCanExecuteChanged();
-                (NavigateForwardCommand as RelayCommand)?.NotifyCanExecuteChanged();
-            }
-        }
-
-        private void NavigateUp()
-        {
-            if (string.IsNullOrEmpty(CurrentPath))
+            if (!CanNavigateForward())
                 return;
 
-            var parent = Directory.GetParent(CurrentPath);
-            if (parent != null)
-            {
-                // Save current for back navigation
-                _backStack.Push(CurrentPath);
-                _forwardStack.Clear();
+            _currentHistoryIndex++;
+            NavigateToPathWithoutHistory(_navigationHistory[_currentHistoryIndex]);
 
-                // Navigate to parent
-                NavigateToPathWithoutHistory(parent.FullName);
-
-                // Update commands
-                (NavigateBackCommand as RelayCommand)?.NotifyCanExecuteChanged();
-                (NavigateForwardCommand as RelayCommand)?.NotifyCanExecuteChanged();
-            }
+            (NavigateBackCommand as RelayCommand)?.NotifyCanExecuteChanged();
+            (NavigateForwardCommand as RelayCommand)?.NotifyCanExecuteChanged();
         }
 
         // Helper method to navigate without affecting history
@@ -780,34 +806,88 @@ namespace CreativeFileBrowser.ViewModels
             if (!Directory.Exists(path))
                 return;
 
-            // Find or create the FileSystemItem for this path
-            FileSystemItem? targetItem = FindFileSystemItemByPath(path);
+            // Update current path and search for matching item
+            CurrentPath = path;
 
-            if (targetItem != null)
+            // Find and select corresponding item in tree if possible
+            var item = FindFileSystemItemByPath(path);
+            if (item != null)
             {
-                // Use existing item
-                SelectedItem = targetItem;
-                EnsureParentsExpanded(targetItem);
+                // Make sure parents are expanded
+                EnsureParentsExpanded(item);
+
+                // Update selected item without adding to history again
+                SetSelectedItemWithoutHistory(item);
             }
             else
             {
-                // Path not in current tree, must rebuild tree
-                CurrentPath = path;
-
-                // Create a temporary item to represent this location
-                var tempItem = new FileSystemItem
-                {
-                    Name = Path.GetFileName(path) ?? path,
-                    FullPath = path,
-                    IsDirectory = true
-                };
-
-                // Expand it to populate children
-                ExpandDirectory(tempItem);
-
-                // Update selected item
-                SelectedItem = tempItem;
+                // If item not found in tree, try to rebuild relevant part of tree
+                RebuildTreeForPath(path);
             }
+        }
+
+        // Helper to set SelectedItem without affecting history
+        private bool _suppressPropertyChanged = false;
+
+        private void SetSelectedItemWithoutHistory(FileSystemItem item)
+        {
+            if (_suppressPropertyChanged)
+                return;
+
+            _suppressPropertyChanged = true;
+
+            try
+            {
+                // Update selected item directly
+                _selectedItem = item;
+                OnPropertyChanged(nameof(SelectedItem));
+
+                // Update preview without changing history
+                LoadPreview(item);
+            }
+            finally
+            {
+                _suppressPropertyChanged = false;
+            }
+        }
+
+
+
+        // Rebuild tree for a specific path
+        private void RebuildTreeForPath(string path)
+        {
+            // Find the nearest parent in the existing tree
+            string? currentPath = path;
+            FileSystemItem? parentItem = null;
+
+            while (currentPath != null && parentItem == null)
+            {
+                parentItem = FindFileSystemItemByPath(currentPath);
+                if (parentItem == null)
+                {
+                    var dirInfo = Directory.GetParent(currentPath);
+                    currentPath = dirInfo?.FullName;
+                }
+            }
+
+            if (parentItem != null)
+            {
+                // Expand the parent to show children
+                ExpandDirectory(parentItem);
+
+                // Try to find our target again now that we've expanded the parent
+                var item = FindFileSystemItemByPath(path);
+                if (item != null)
+                {
+                    // Found it after expanding parent
+                    SetSelectedItemWithoutHistory(item);
+                    return;
+                }
+            }
+
+            // If we couldn't find a parent or the item, just update the current path
+            // This will at least reflect the right location even if selection doesn't work
+            CurrentPath = path;
         }
 
         // Helper to find a FileSystemItem by path in our tree

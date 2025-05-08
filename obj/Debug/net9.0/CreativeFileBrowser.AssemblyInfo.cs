@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CreativeFileBrowser")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a1e21140bedad0120a3e1108ec388b71f04e4b8c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c713fd5d9b9a2b385dba477699109d348aeea17a")]
 [assembly: System.Reflection.AssemblyProductAttribute("CreativeFileBrowser")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CreativeFileBrowser")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
